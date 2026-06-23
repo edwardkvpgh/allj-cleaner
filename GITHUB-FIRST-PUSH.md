@@ -107,6 +107,7 @@ git push https://edwardkvpgh:PASTE_YOUR_TOKEN_HERE@github.com/edwardkvpgh/allj-c
 
 7)  Set upstream for future pushes
 
+git fetch origin
 git branch --set-upstream-to=origin/main main
 
 ### Option B — SSH
