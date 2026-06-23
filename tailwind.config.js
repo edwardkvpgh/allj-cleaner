@@ -8,8 +8,8 @@ export default {
         body: ["Space Grotesk", "system-ui", "sans-serif"],
       },
       colors: {
-        void: "#07070d",
-        surface: "#12121c",
+        void: "#12121f",
+        surface: "#1c1d2e",
         glass: "rgba(255,255,255,0.04)",
         neon: {
           pink: "#ff2d95",

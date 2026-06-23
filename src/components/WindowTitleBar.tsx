@@ -29,52 +29,67 @@ export function WindowTitleBar() {
   }, []);
 
   return (
-    <div className="relative z-20 flex h-10 w-full shrink-0 items-stretch border-b border-neon-purple/35 bg-gradient-to-r from-[#1a0f2e] via-void to-[#0d1524] shadow-[0_1px_0_rgba(168,85,247,0.25)]">
-      <div
-        data-tauri-drag-region
-        onMouseDown={startDrag}
-        onDoubleClick={toggleMaximize}
-        className="titlebar-drag flex min-w-0 flex-1 items-center gap-2 px-3"
-      >
+    <div className="relative z-20 h-10 w-full shrink-0 overflow-hidden border-b border-neon-purple/40 bg-gradient-to-r from-[#1f1238]/90 via-[#141525] to-[#0f1a2e]/90 shadow-[0_1px_0_rgba(168,85,247,0.35),0_8px_32px_rgba(168,85,247,0.12)]">
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="titlebar-orb left-[30%] top-1/2 h-10 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse_slow bg-neon-purple/35" />
         <div
-          data-tauri-drag-region
-          className="titlebar-drag flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-neon-purple/25"
-        >
-          <Sparkles size={13} className="pointer-events-none text-neon-cyan" />
-        </div>
-        <span
-          data-tauri-drag-region
-          className="titlebar-drag truncate font-display text-xs font-semibold tracking-wide text-white/85"
-        >
-          {APP_NAME}
-        </span>
+          className="titlebar-orb left-1/2 top-1/2 h-9 w-44 -translate-x-1/2 -translate-y-1/2 animate-float bg-neon-cyan/30"
+          style={{ animationDelay: "1.2s" }}
+        />
+        <div
+          className="titlebar-orb right-28 top-1/2 h-10 w-40 -translate-y-1/2 animate-float bg-neon-pink/28"
+          style={{ animationDelay: "2.4s" }}
+        />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-neon-cyan/50 to-transparent" />
       </div>
 
-      <div className="titlebar-no-drag flex shrink-0 items-stretch">
-        <button
-          type="button"
-          aria-label="Minimize window"
-          onClick={minimize}
-          className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+      <div className="relative z-10 flex h-full items-stretch">
+        <div
+          data-tauri-drag-region
+          onMouseDown={startDrag}
+          onDoubleClick={toggleMaximize}
+          className="titlebar-drag flex min-w-0 flex-1 items-center gap-2 px-3"
         >
-          <Minus size={14} strokeWidth={2.5} />
-        </button>
-        <button
-          type="button"
-          aria-label="Maximize window"
-          onClick={toggleMaximize}
-          className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <Square size={12} strokeWidth={2.5} />
-        </button>
-        <button
-          type="button"
-          aria-label="Close window"
-          onClick={close}
-          className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/70 transition-colors hover:bg-neon-pink hover:text-white"
-        >
-          <X size={15} strokeWidth={2.5} />
-        </button>
+          <div
+            data-tauri-drag-region
+            className="titlebar-drag flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-neon-purple/30 shadow-[0_0_12px_rgba(168,85,247,0.45)]"
+          >
+            <Sparkles size={13} className="pointer-events-none text-neon-cyan drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+          </div>
+          <span
+            data-tauri-drag-region
+            className="titlebar-drag truncate font-display text-xs font-semibold tracking-wide text-white/90"
+          >
+            {APP_NAME}
+          </span>
+        </div>
+
+        <div className="titlebar-no-drag flex shrink-0 items-stretch">
+          <button
+            type="button"
+            aria-label="Minimize window"
+            onClick={minimize}
+            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <Minus size={14} strokeWidth={2.5} />
+          </button>
+          <button
+            type="button"
+            aria-label="Maximize window"
+            onClick={toggleMaximize}
+            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <Square size={12} strokeWidth={2.5} />
+          </button>
+          <button
+            type="button"
+            aria-label="Close window"
+            onClick={close}
+            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/70 transition-colors hover:bg-neon-pink hover:text-white hover:shadow-[inset_0_0_16px_rgba(255,45,149,0.35)]"
+          >
+            <X size={15} strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
     </div>
   );

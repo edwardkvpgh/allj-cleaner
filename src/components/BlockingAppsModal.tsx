@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, Check } from "lucide-react";
 import type { LockingApp } from "../types";
 import { appProcessLabel, displayAppName } from "../utils/apps";
+import { SectionSelectionBar } from "./SectionSelectionBar";
 
 export type BlockingModalMode = "scan" | "clean";
 
@@ -81,18 +82,14 @@ export function BlockingAppsModal({
           </div>
         </div>
 
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-xs text-white/40">
-            {selectedApps.length} of {apps.length} selected
-          </p>
-          <button
-            type="button"
-            onClick={toggleAll}
+        <div className="mb-2">
+          <SectionSelectionBar
+            selectedCount={selectedApps.length}
+            totalCount={apps.length}
+            allSelected={allSelected}
+            onToggle={toggleAll}
             disabled={busy}
-            className="text-xs text-neon-cyan/80 transition-colors hover:text-neon-cyan disabled:opacity-40"
-          >
-            {allSelected ? "deselect all" : "select all"}
-          </button>
+          />
         </div>
 
         <ul className="mb-4 max-h-48 space-y-2 overflow-y-auto">
@@ -137,7 +134,7 @@ export function BlockingAppsModal({
         </ul>
 
         <p className="mb-4 text-xs text-amber-400/80">
-          unsaved work in closed apps will be lost. shell, search, and other system apps are never closed.
+          unsaved work in closed apps will be lost. File Explorer, shell, search, and other system apps are never closed.
         </p>
 
         <div className="flex flex-wrap justify-end gap-2">

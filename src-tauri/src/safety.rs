@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 const BLOCKED_SEGMENTS: &[&str] = &[
     "system32",
@@ -8,6 +8,20 @@ const BLOCKED_SEGMENTS: &[&str] = &[
     "program files (x86)",
     "users\\public",
 ];
+
+const DENIED_BASENAMES: &[&str] = &[
+    "login data",
+    "login data-journal",
+    "web data",
+    "web data-journal",
+    "account web data",
+    "bookmarks",
+    "bookmarks.bak",
+    "preferences",
+    "secure preferences",
+];
+
+const DENIED_DIR_NAMES: &[&str] = &["extensions"];
 
 pub fn resolved_roots(paths: &[PathBuf]) -> Vec<PathBuf> {
     let mut roots: Vec<PathBuf> = Vec::new();
@@ -22,6 +36,10 @@ pub fn resolved_roots(paths: &[PathBuf]) -> Vec<PathBuf> {
 }
 
 pub fn is_safe_target(path: &Path, allowed_roots: &[PathBuf]) -> bool {
+    if path_has_denied_segment(path) {
+        return false;
+    }
+
     let normalized = normalize(path);
     let normalized_str = normalized.to_string_lossy().to_lowercase();
 
@@ -34,6 +52,20 @@ pub fn is_safe_target(path: &Path, allowed_roots: &[PathBuf]) -> bool {
     allowed_roots
         .iter()
         .any(|root| is_within_root(&normalized, root))
+}
+
+fn path_has_denied_segment(path: &Path) -> bool {
+    for component in path.components() {
+        let Component::Normal(name) = component else {
+            continue;
+        };
+        let lower = name.to_string_lossy().to_lowercase();
+        if DENIED_BASENAMES.contains(&lower.as_str()) || DENIED_DIR_NAMES.contains(&lower.as_str())
+        {
+            return true;
+        }
+    }
+    false
 }
 
 fn is_within_root(path: &Path, root: &Path) -> bool {

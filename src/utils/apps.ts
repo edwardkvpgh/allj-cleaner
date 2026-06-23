@@ -76,9 +76,26 @@ const PROTECTED_PROCESS_NAMES = new Set([
   "node",
 ]);
 
+export function processBasename(name: string): string {
+  const normalized = name.toLowerCase().trimEnd().replace(/\.exe$/i, "");
+  const slash = Math.max(normalized.lastIndexOf("\\"), normalized.lastIndexOf("/"));
+  return slash >= 0 ? normalized.slice(slash + 1) : normalized;
+}
+
 export function isProtectedAppName(name: string): boolean {
-  const base = name.toLowerCase().trimEnd().replace(/\.exe$/i, "");
-  return PROTECTED_PROCESS_NAMES.has(base);
+  const base = processBasename(name);
+  const full = name.toLowerCase();
+
+  if (PROTECTED_PROCESS_NAMES.has(base)) {
+    return true;
+  }
+
+  return (
+    full === "windows explorer" ||
+    full === "file explorer" ||
+    full.includes("shell experience") ||
+    full.includes("start menu experience")
+  );
 }
 
 export function filterCloseableLockingApps(apps: LockingApp[]): LockingApp[] {

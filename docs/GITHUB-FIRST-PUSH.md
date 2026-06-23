@@ -170,6 +170,23 @@ Or ask in chat:
 
 ---
 
+## Quick changed-files commands
+
+Use:
+
+```powershell
+git status --short
+```
+
+If you want only file paths (no status letters):
+
+```powershell
+git diff --name-only
+git diff --name-only --cached
+```
+
+---
+
 ## Troubleshooting
 
 | Problem | Fix |

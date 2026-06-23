@@ -118,6 +118,12 @@ mod windows_impl {
     }
 
     fn image_size(format: u16) -> usize {
+        if format == CF_BITMAP {
+            // CF_BITMAP returns an HBITMAP, not a global memory handle.
+            // GlobalSize/GlobalLock on it corrupts the heap.
+            return 0;
+        }
+
         if unsafe { IsClipboardFormatAvailable(format as u32) } == 0 {
             return 0;
         }
@@ -129,6 +135,15 @@ mod windows_impl {
         } else {
             0
         }
+    }
+
+    fn bitmap_presence_size() -> usize {
+        if unsafe { IsClipboardFormatAvailable(CF_BITMAP as u32) } == 0 {
+            return 0;
+        }
+
+        // Count bitmap clipboard data without touching the HBITMAP handle.
+        MIN_IMAGE_BYTES
     }
 
     fn registered_image_size(name: &str) -> usize {
@@ -176,11 +191,16 @@ mod windows_impl {
             sizes.push(size);
         }
 
-        for format in [CF_BITMAP, CF_DIB, CF_DIBV5] {
+        for format in [CF_DIB, CF_DIBV5] {
             let size = image_size(format);
             if size > 0 {
                 sizes.push(size);
             }
+        }
+
+        let bitmap_size = bitmap_presence_size();
+        if bitmap_size > 0 {
+            sizes.push(bitmap_size);
         }
 
         for name in ["PNG", "JFIF", "GIF", "WebP", "image/png"] {

@@ -136,17 +136,24 @@ Users need a **safe, transparent tool** that shows what will be deleted, how muc
 
 | Feature | Status |
 |---------|--------|
-| Firefox cache clean | 🔲 Planned |
-| Brave cache clean | 🔲 Planned |
-| Thumbnail cache clean | 🔲 Planned |
-| Common app caches (Teams, Discord, Spotify) | 🔲 Planned |
+| Firefox cache clean | ✅ Shipped |
+| Brave cache clean | ✅ Shipped |
+| Thumbnail cache clean | ✅ Shipped |
+| Common app caches (Teams, Discord, Spotify) | ✅ Shipped |
+
+### Version 0.3 — Pending (Optional)
+
+**Status: pending / optional**
+
+| Feature | Status |
+|---------|--------|
 | System tray icon | 🔲 Planned |
 | Scheduled automatic cleaning | 🔲 Planned |
 | Admin-mode for Windows system caches | 🔲 Planned |
 | Settings: exclusions, defaults, Recycle Bin preference | 🔲 Planned |
 | Expandable error log in UI | 🔲 Planned |
 
-### Version 0.3 — Expansion
+### Version 0.4 — Pending (future)
 
 **Status: optional / future**
 

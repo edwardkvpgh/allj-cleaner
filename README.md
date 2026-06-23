@@ -2,7 +2,7 @@
 
 Disk detox for the chronically online. Scan and clean temp files, browser caches, and your Recycle Bin — with a full preview before anything gets yeeted.
 
-**Version:** MVP v0.1 · **Platform:** Windows 10/11 · **License:** [MIT — free](./LICENSE.md)
+**Version:** v0.2 (privacy preview) · **Platform:** Windows 10/11 · **License:** [MIT — free](./LICENSE.md)
 
 ---
 
@@ -16,8 +16,24 @@ EDdys Cleaner is a standalone desktop app that finds junk on your PC, shows you 
 | Recycle Bin | Items you "deleted" but didn't yeet |
 | Chrome Cache | Browser cache (all profiles) |
 | Edge Cache | Browser cache (all profiles) |
+| Clipboard | Copied text and Win+V history when possible |
+| Thumbnail Cache | Explorer `thumbcache_*.db` and `iconcache_*.db` (delete-on-reboot if locked) |
+| **Privacy & sessions** *(opt-in)* | |
+| Chrome — Cookies & Sessions | Site logins + tab/session restore (passwords **not** removed) |
+| Chrome — History & Downloads List | URLs and browser download list |
+| Chrome — Site Storage | Local storage, IndexedDB, session storage |
+| Edge — (same three) | Same privacy categories for Microsoft Edge |
+| Brave — (same three) | Same privacy categories for Brave *(when installed)* |
+| Firefox — (same three) | Same privacy categories for Firefox *(when installed)* |
+| **Misc** *(opt-in)* | |
+| Downloads Folder | Files in `%USERPROFILE%\Downloads` — confirmation required |
+| DNS Cache | Flushes Windows DNS resolver cache (`ipconfig /flushdns`) |
+
+**Secure exit** — one-click preset selects every **Privacy & sessions** item (browser sign-out only; never Downloads or DNS).
 
 **Also includes:** blocking-app detection with confirmation before force close, partial-clean reporting, and delete-on-restart for locked files.
+
+Privacy and misc categories are **not** auto-selected on scan — pick them manually when needed. See [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md).
 
 ---
 
@@ -68,7 +84,7 @@ After you scan, three buttons appear at the bottom of the app:
 | Core engine | Rust |
 | Windows integration | Shell API, Restart Manager, delete-on-reboot |
 
-Full architecture and roadmap: **[PROPOSAL.md](./PROPOSAL.md)**
+Full stack details: **[TECH-STACK.md](./docs/TECH-STACK.md)** · Product roadmap: **[INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md)**
 
 ---
 
@@ -80,7 +96,7 @@ Full architecture and roadmap: **[PROPOSAL.md](./PROPOSAL.md)**
 | **v0.2** | Firefox, Brave, thumbnail/app caches, tray, scheduler, admin mode | 🔲 Planned |
 | **v0.3** | macOS/Linux, smart rules, portable edition, code signing | 🔲 Future |
 
-See [PROPOSAL.md](./PROPOSAL.md) for the full feature list per version.
+See [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) for the full feature list per version. Privacy work is detailed in [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md).
 
 ---
 
@@ -255,12 +271,18 @@ Windows often locks temp files while apps are running. If you see **partially ye
 
 ---
 
-## Project Docs
+## Project docs
+
+All documentation lives in the [`docs/`](./docs/) folder.
 
 | Document | Contents |
 |----------|----------|
-| [PROPOSAL.md](./PROPOSAL.md) | Full proposal, architecture, v0.1 / v0.2 / v0.3 roadmap |
-| [LICENSE.md](./LICENSE.md) | MIT License — free to use |
+| [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) | Original product proposal, architecture overview, v0.1 / v0.2 / v0.3 roadmap |
+| [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) | Privacy & sessions implementation guide — browser sign-out, secure exit, DNS, phased delivery |
+| [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md) | PI (Performance) menu — startup apps, background apps, outdated apps/drivers; feasibility and phased plan |
+| [TECH-STACK.md](./docs/TECH-STACK.md) | Full tech stack (Tauri, React, Rust, tooling) and purpose of each component |
+| [GITHUB-FIRST-PUSH.md](./docs/GITHUB-FIRST-PUSH.md) | First-time Git setup, push workflow, and useful git commands |
+| [LICENSE.md](./LICENSE.md) | MIT License — free to use, modify, and distribute |
 
 ---
 

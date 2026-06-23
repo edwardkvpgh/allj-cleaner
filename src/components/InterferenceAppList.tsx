@@ -39,7 +39,7 @@ const CLOSEABLE_ADVICE: Record<string, string> = {
 
 const PROTECTED_ADVICE: Record<string, string> = {
   explorer:
-    "File Explorer is using temp files (previews, copies). Close extra Explorer windows, or restart Windows Explorer from Task Manager.",
+    "File Explorer must stay running — never close it. Thumbnail cache uses delete-on-reboot for locked files.",
   runtimebroker:
     "Windows Runtime Broker — a system helper. We cannot close it; yeet anyway still removes unlocked files.",
   searchhost:

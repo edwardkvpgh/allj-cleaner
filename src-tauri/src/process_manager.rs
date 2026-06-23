@@ -35,12 +35,10 @@ mod windows_impl {
             return vec![];
         }
 
-        let needs_browser_check = category_ids.iter().any(|id| {
-            matches!(
-                id.as_str(),
-                "chrome_cache" | "edge_cache" | "firefox_cache" | "brave_cache"
-            )
-        }) || category_ids.iter().any(|id| id == "user_temp");
+        let needs_browser_check = category_ids
+            .iter()
+            .any(|id| crate::paths::category_needs_browser_check(id))
+            || category_ids.iter().any(|id| id == "user_temp");
         let needs_temp_check = category_ids.iter().any(|id| id == "user_temp");
 
         let mut apps = Vec::new();
@@ -70,12 +68,10 @@ mod windows_impl {
     pub fn find_interference_apps(paths: &[PathBuf], category_ids: &[String]) -> Vec<InterferenceApp> {
         let existing: Vec<PathBuf> = paths.iter().filter(|p| p.exists()).cloned().collect();
 
-        let needs_browser_check = category_ids.iter().any(|id| {
-            matches!(
-                id.as_str(),
-                "chrome_cache" | "edge_cache" | "firefox_cache" | "brave_cache"
-            )
-        }) || category_ids.iter().any(|id| id == "user_temp");
+        let needs_browser_check = category_ids
+            .iter()
+            .any(|id| crate::paths::category_needs_browser_check(id))
+            || category_ids.iter().any(|id| id == "user_temp");
         let needs_temp_check = category_ids.iter().any(|id| id == "user_temp");
 
         let mut apps = Vec::new();
@@ -548,58 +544,85 @@ mod windows_impl {
         String::from_utf16_lossy(&buffer[..len])
     }
 
+    const PROTECTED_NAMES: &[&str] = &[
+        "system",
+        "registry",
+        "smss",
+        "csrss",
+        "wininit",
+        "services",
+        "lsass",
+        "svchost",
+        "explorer",
+        "dwm",
+        "winlogon",
+        "allj-cleaner",
+        "tauri-app",
+        "cursor",
+        "code",
+        "runtimebroker",
+        "searchhost",
+        "searchindexer",
+        "searchprotocolhost",
+        "sihost",
+        "taskhostw",
+        "dllhost",
+        "msiexec",
+        "node",
+        "python",
+        "java",
+        "powershell",
+        "pwsh",
+        "cmd",
+        "conhost",
+        "fontdrvhost",
+        "applicationframehost",
+        "widgetservice",
+        "securityhealthservice",
+        "shellexperiencehost",
+        "startmenuexperiencehost",
+        "phoneexperiencehost",
+        "textinputhost",
+        "systemsettings",
+        "lockapp",
+        "ctfmon",
+        "msedgewebview2",
+    ];
+
     fn is_protected(name: &str, pid: u32) -> bool {
         if pid <= 4 {
             return true;
         }
 
-        let normalized = name.to_lowercase().trim_end_matches(".exe").to_string();
-        const PROTECTED_NAMES: &[&str] = &[
-            "system",
-            "registry",
-            "smss",
-            "csrss",
-            "wininit",
-            "services",
-            "lsass",
-            "svchost",
-            "explorer",
-            "dwm",
-            "winlogon",
-            "allj-cleaner",
-            "tauri-app",
-            "cursor",
-            "code",
-            "runtimebroker",
-            "searchhost",
-            "searchindexer",
-            "searchprotocolhost",
-            "sihost",
-            "taskhostw",
-            "dllhost",
-            "msiexec",
-            "node",
-            "python",
-            "java",
-            "powershell",
-            "pwsh",
-            "cmd",
-            "conhost",
-            "fontdrvhost",
-            "applicationframehost",
-            "widgetservice",
-            "securityhealthservice",
-            "shellexperiencehost",
-            "startmenuexperiencehost",
-            "phoneexperiencehost",
-            "textinputhost",
-            "systemsettings",
-            "lockapp",
-            "ctfmon",
-            "msedgewebview2",
-        ];
+        let base = process_basename(name);
+        let full = name.to_lowercase();
 
-        PROTECTED_NAMES.iter().any(|p| normalized == *p)
+        if PROTECTED_NAMES.iter().any(|p| base == *p) {
+            return true;
+        }
+
+        if full == "windows explorer"
+            || full == "file explorer"
+            || full.contains("shell experience")
+            || full.contains("start menu experience")
+        {
+            return true;
+        }
+
+        false
+    }
+
+    fn process_basename(name: &str) -> String {
+        let normalized = name.to_lowercase().trim_end_matches(".exe").to_string();
+
+        if normalized.contains('\\') || normalized.contains('/') {
+            Path::new(&normalized)
+                .file_name()
+                .map(|segment| segment.to_string_lossy().to_lowercase())
+                .unwrap_or(normalized)
+        } else {
+            normalized
+        }
     }
 }
 
@@ -632,13 +655,16 @@ pub fn force_close_apps(_apps: &[LockingApp]) -> CloseAppsResult {
 }
 
 pub fn interference_apps_for_categories(category_ids: &[String]) -> Vec<InterferenceApp> {
-    use crate::paths::resolve_category_paths;
+    use crate::paths::{category_skips_locking_paths, resolve_category_paths};
 
     let (tx, rx) = mpsc::channel();
     let ids = category_ids.to_vec();
     thread::spawn(move || {
         let mut paths = Vec::new();
         for id in &ids {
+            if category_skips_locking_paths(id) {
+                continue;
+            }
             paths.extend(resolve_category_paths(id));
         }
         let apps = find_interference_apps(&paths, &ids);
@@ -650,13 +676,16 @@ pub fn interference_apps_for_categories(category_ids: &[String]) -> Vec<Interfer
 }
 
 pub fn locking_apps_for_categories(category_ids: &[String]) -> Vec<LockingApp> {
-    use crate::paths::resolve_category_paths;
+    use crate::paths::{category_skips_locking_paths, resolve_category_paths};
 
     let (tx, rx) = mpsc::channel();
     let ids = category_ids.to_vec();
     thread::spawn(move || {
         let mut paths = Vec::new();
         for id in &ids {
+            if category_skips_locking_paths(id) {
+                continue;
+            }
             paths.extend(resolve_category_paths(id));
         }
         let apps = find_locking_apps(&paths, &ids);

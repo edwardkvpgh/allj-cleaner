@@ -37,15 +37,33 @@
   }
 
   .glass-card {
-    @apply rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+    @apply rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl;
   }
 
   .mesh-bg {
     background:
-      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(168, 85, 247, 0.18), transparent 50%),
-      radial-gradient(ellipse 60% 50% at 90% 10%, rgba(34, 211, 238, 0.12), transparent 50%),
-      radial-gradient(ellipse 50% 40% at 70% 90%, rgba(255, 45, 149, 0.1), transparent 50%),
-      #07070d;
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(168, 85, 247, 0.22), transparent 50%),
+      radial-gradient(ellipse 60% 50% at 90% 10%, rgba(34, 211, 238, 0.16), transparent 50%),
+      radial-gradient(ellipse 55% 45% at 55% 35%, rgba(255, 45, 149, 0.1), transparent 55%),
+      radial-gradient(ellipse 45% 35% at 18% 88%, rgba(34, 211, 238, 0.12), transparent 50%),
+      radial-gradient(ellipse 50% 40% at 50% 92%, rgba(168, 85, 247, 0.14), transparent 50%),
+      radial-gradient(ellipse 35% 55% at 92% 55%, rgba(34, 211, 238, 0.14), transparent 55%),
+      radial-gradient(ellipse 50% 40% at 70% 90%, rgba(255, 45, 149, 0.12), transparent 50%),
+      #12121f;
+  }
+
+  .ambient-orb {
+    pointer-events: none;
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(64px);
+  }
+
+  .titlebar-orb {
+    pointer-events: none;
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(32px);
   }
 
   .titlebar-drag {

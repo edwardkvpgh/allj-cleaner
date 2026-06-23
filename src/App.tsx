@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  LogOut,
   ScanSearch,
   Trash2,
   RotateCcw,
@@ -14,11 +15,30 @@ import { WindowTitleBar } from "./components/WindowTitleBar";
 import { CategoryCard } from "./components/CategoryCard";
 import { BlockingAppsModal, type BlockingModalMode } from "./components/BlockingAppsModal";
 import { TempCleanPrompt } from "./components/TempCleanPrompt";
+import { SecureExitModal } from "./components/SecureExitModal";
+import { QuickCleanModal } from "./components/QuickCleanModal";
+import { DownloadsConfirmModal } from "./components/DownloadsConfirmModal";
 import { NoAppsFoundModal } from "./components/NoAppsFoundModal";
+import { CollapsibleScanSection } from "./components/CollapsibleScanSection";
+import { SectionSelectionBar } from "./components/SectionSelectionBar";
 import type { AppPhase, CleanResult, InterferenceApp, LockingApp, ScanCategory } from "./types";
 import { APP_NAME, COMPANY_NAME } from "./constants/brand";
 import { formatBytes } from "./utils/format";
-import { sortCategoriesBySize } from "./utils/categories";
+import {
+  sortCategoriesBySize,
+  partitionCategories,
+  defaultSelectedCategoryIds,
+  isCategorySelectable,
+  sectionAllSelected,
+  sectionSelectionCounts,
+  sectionSizeTotals,
+  sectionSelectableCategories,
+  secureExitAvailable,
+  selectedIncludesDns,
+  selectedIncludesDownloads,
+  selectedIncludesThumbnail,
+  selectedIncludesPrivacy,
+} from "./utils/categories";
 import { closeableInterferenceApps, filterCloseableLockingApps } from "./utils/apps";
 import {
   enrichCleanResult,
@@ -43,12 +63,21 @@ function App() {
   const [pendingCategoryIds, setPendingCategoryIds] = useState<string[]>([]);
   const [blockingModalMode, setBlockingModalMode] =
     useState<BlockingModalMode>("clean");
+  const [showSecureExitModal, setShowSecureExitModal] = useState(false);
+  const [showQuickCleanModal, setShowQuickCleanModal] = useState(false);
+  const [showDownloadsConfirmModal, setShowDownloadsConfirmModal] = useState(false);
+  const [diskSectionOpen, setDiskSectionOpen] = useState(false);
+  const [privacySectionOpen, setPrivacySectionOpen] = useState(false);
+  const [miscSectionOpen, setMiscSectionOpen] = useState(false);
   const [dismissedBlockingPrompt, setDismissedBlockingPrompt] = useState(false);
 
   const clearBlockingState = useCallback(() => {
     setShowBlockingModal(false);
     setShowTempPrompt(false);
     setShowNoAppsFound(false);
+    setShowSecureExitModal(false);
+    setShowQuickCleanModal(false);
+    setShowDownloadsConfirmModal(false);
     setBlockingApps([]);
     setInterferenceApps([]);
     setLoadingInterferenceApps(false);
@@ -67,14 +96,28 @@ function App() {
     [categories, selected],
   );
 
-  const selectableCategories = useMemo(
-    () => categories.filter((c) => c.available && c.size_bytes > 0),
-    [categories],
-  );
 
   const sortedCategories = useMemo(
     () => sortCategoriesBySize(categories),
     [categories],
+  );
+
+  const { disk: diskCategories, privacy: privacyCategories, misc: miscCategories } =
+    useMemo(() => partitionCategories(sortedCategories), [sortedCategories]);
+
+  const selectableDiskCategories = useMemo(
+    () => sectionSelectableCategories(diskCategories),
+    [diskCategories],
+  );
+
+  const selectablePrivacyCategories = useMemo(
+    () => sectionSelectableCategories(privacyCategories),
+    [privacyCategories],
+  );
+
+  const selectableMiscCategories = useMemo(
+    () => sectionSelectableCategories(miscCategories),
+    [miscCategories],
   );
 
   const setSortedCategories = useCallback((next: ScanCategory[]) => {
@@ -87,12 +130,10 @@ function App() {
     try {
       const results = await invoke<ScanCategory[]>("scan_all");
       setSortedCategories(results);
-      const defaultSelected = new Set(
-        results
-          .filter((c) => c.available && c.size_bytes > 0)
-          .map((c) => c.id),
-      );
-      setSelected(defaultSelected);
+      setSelected(defaultSelectedCategoryIds(results));
+      setDiskSectionOpen(false);
+      setPrivacySectionOpen(false);
+      setMiscSectionOpen(false);
       setPhase("results");
     } catch {
       setPhase("idle");
@@ -247,6 +288,11 @@ function App() {
     if (selected.size === 0 || checkingBlockers) return;
 
     const categoryIds = Array.from(selected);
+    if (categoryIds.includes("downloads_folder") && !showDownloadsConfirmModal) {
+      setShowDownloadsConfirmModal(true);
+      return;
+    }
+    setShowDownloadsConfirmModal(false);
     setPendingCategoryIds(categoryIds);
     setDismissedBlockingPrompt(false);
     setCheckingBlockers(true);
@@ -276,7 +322,14 @@ function App() {
     }
 
     await runClean(categoryIds);
-  }, [selected, runClean, checkingBlockers, findBlockingApps, fetchInterferenceApps]);
+  }, [
+    selected,
+    runClean,
+    checkingBlockers,
+    findBlockingApps,
+    fetchInterferenceApps,
+    showDownloadsConfirmModal,
+  ]);
 
   const closeSelectedApps = useCallback(async (appsToClose: LockingApp[]) => {
     if (appsToClose.length === 0) return;
@@ -342,9 +395,67 @@ function App() {
     });
   }, []);
 
-  const selectAll = useCallback(() => {
-    setSelected(new Set(selectableCategories.map((c) => c.id)));
-  }, [selectableCategories]);
+  const handleSecureExitConfirm = useCallback(
+    (selectedIds: Set<string>) => {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        for (const category of privacyCategories) {
+          next.delete(category.id);
+        }
+        for (const id of selectedIds) {
+          next.add(id);
+        }
+        return next;
+      });
+      setShowSecureExitModal(false);
+      setPhase((current) => (current === "done" ? "results" : current));
+    },
+    [privacyCategories],
+  );
+
+  const handleQuickCleanSelect = useCallback(() => {
+    setShowQuickCleanModal(true);
+  }, []);
+
+  const handleQuickCleanConfirm = useCallback((selectedIds: Set<string>) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const category of diskCategories) {
+        next.delete(category.id);
+      }
+      for (const id of selectedIds) {
+        next.add(id);
+      }
+      return next;
+    });
+    setShowQuickCleanModal(false);
+    setDiskSectionOpen(true);
+    setPrivacySectionOpen(false);
+    setMiscSectionOpen(false);
+    setPhase((current) => (current === "done" ? "results" : current));
+  }, [diskCategories]);
+
+  const selectSection = useCallback((sectionCategories: ScanCategory[]) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const category of sectionSelectableCategories(sectionCategories)) {
+        next.add(category.id);
+      }
+      return next;
+    });
+    setPhase((current) => (current === "done" ? "results" : current));
+  }, []);
+
+  const deselectSection = useCallback((sectionCategories: ScanCategory[]) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const category of sectionCategories) {
+        next.delete(category.id);
+      }
+      return next;
+    });
+    setPhase((current) => (current === "done" ? "results" : current));
+  }, []);
 
   const reset = useCallback(() => {
     clearBlockingState();
@@ -362,7 +473,10 @@ function App() {
     !isLoading &&
     !modalActive &&
     !showTempPrompt &&
-    !showNoAppsFound;
+    !showNoAppsFound &&
+    !showSecureExitModal &&
+    !showQuickCleanModal &&
+    !showDownloadsConfirmModal;
   const showResults =
     phase === "scanning" ||
     phase === "results" ||
@@ -376,8 +490,47 @@ function App() {
     <div className="mesh-bg relative flex h-full flex-col overflow-hidden">
       <WindowTitleBar />
 
-      <div className="pointer-events-none absolute -left-20 top-20 h-64 w-64 animate-float rounded-full bg-neon-purple/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 bottom-32 h-56 w-56 animate-float rounded-full bg-neon-cyan/10 blur-3xl" style={{ animationDelay: "2s" }} />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        {/* Base corners */}
+        <div className="ambient-orb -left-20 top-20 h-64 w-64 animate-float bg-neon-purple/14" />
+        <div
+          className="ambient-orb -right-16 bottom-32 h-56 w-56 animate-float bg-neon-cyan/14"
+          style={{ animationDelay: "2s" }}
+        />
+
+        {/* 1 — upper center / quick-clean zone */}
+        <div
+          className="ambient-orb left-[48%] top-[20%] h-52 w-80 -translate-x-1/2 animate-float bg-neon-pink/12"
+          style={{ animationDelay: "0.8s" }}
+        />
+        <div
+          className="ambient-orb left-[58%] top-[28%] h-36 w-48 animate-float bg-neon-purple/10"
+          style={{ animationDelay: "1.6s" }}
+        />
+
+        {/* 2 — bottom-left footer status */}
+        <div
+          className="ambient-orb bottom-20 left-[10%] h-44 w-60 animate-float bg-neon-cyan/12"
+          style={{ animationDelay: "2.4s" }}
+        />
+
+        {/* 3 — bottom center / action buttons */}
+        <div
+          className="ambient-orb bottom-24 left-1/2 h-40 w-72 -translate-x-1/2 animate-float bg-neon-purple/14"
+          style={{ animationDelay: "1.2s" }}
+        />
+        <div
+          className="ambient-orb bottom-28 left-[62%] h-32 w-52 animate-float bg-neon-pink/10"
+          style={{ animationDelay: "3s" }}
+        />
+
+        {/* 4 & 5 — right rail glow */}
+        <div className="ambient-orb -right-6 top-[38%] h-80 w-36 -translate-y-1/2 animate-pulse_slow bg-neon-cyan/12" />
+        <div
+          className="ambient-orb right-[6%] top-[52%] h-64 w-28 -translate-y-1/2 animate-float bg-neon-purple/10"
+          style={{ animationDelay: "2.8s" }}
+        />
+      </div>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col p-6">
         <Header />
@@ -414,6 +567,27 @@ function App() {
           onYeetAnyway={() => {
             setShowNoAppsFound(false);
             void runClean(pendingCategoryIds);
+          }}
+        />
+
+        <SecureExitModal
+          open={showSecureExitModal}
+          categories={privacyCategories}
+          onCancel={() => setShowSecureExitModal(false)}
+          onConfirm={handleSecureExitConfirm}
+        />
+        <QuickCleanModal
+          open={showQuickCleanModal}
+          categories={diskCategories}
+          onCancel={() => setShowQuickCleanModal(false)}
+          onConfirm={handleQuickCleanConfirm}
+        />
+        <DownloadsConfirmModal
+          open={showDownloadsConfirmModal}
+          category={categories.find((item) => item.id === "downloads_folder") ?? null}
+          onCancel={() => setShowDownloadsConfirmModal(false)}
+          onConfirm={() => {
+            void handleClean();
           }}
         />
 
@@ -500,7 +674,7 @@ function App() {
 
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-white/30">
+                    <p className="text-xs font-medium uppercase tracking-widest text-neon-cyan/80">
                       {phase === "scanning"
                         ? "scanning..."
                         : phase === "cleaning"
@@ -524,15 +698,6 @@ function App() {
                       )}
                     </p>
                   </div>
-
-                  {canAct && selectableCategories.length > 0 && (
-                    <button
-                      onClick={selectAll}
-                      className="text-xs text-neon-cyan/80 transition-colors hover:text-neon-cyan"
-                    >
-                      select all
-                    </button>
-                  )}
                 </div>
 
                 <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
@@ -542,15 +707,153 @@ function App() {
                       <p className="text-sm">scanning your digital mess...</p>
                     </div>
                   ) : (
-                    sortedCategories.map((cat, i) => (
-                      <CategoryCard
-                        key={cat.id}
-                        category={cat}
-                        selected={selected.has(cat.id)}
-                        onToggle={toggleCategory}
-                        index={i}
-                      />
-                    ))
+                    <>
+                      {diskCategories.length > 0 && (
+                        <CollapsibleScanSection
+                          title="disk junk"
+                          titleClassName="text-neon-cyan/85"
+                          accent="cyan"
+                          sizeSummary={sectionSizeTotals(selected, diskCategories)}
+                          sizeAccentClassName="text-neon-cyan/80"
+                          open={diskSectionOpen}
+                          onToggle={() => setDiskSectionOpen((open) => !open)}
+                          headerAction={
+                            canAct && selectableDiskCategories.length > 0 ? (
+                              <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+                                <button
+                                  type="button"
+                                  onClick={handleQuickCleanSelect}
+                                  className="flex items-center gap-1.5 rounded-full border border-neon-cyan/35 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-colors hover:bg-neon-cyan/20"
+                                >
+                                  <Zap size={12} />
+                                  quick clean
+                                </button>
+                                <SectionSelectionBar
+                                  accent="cyan"
+                                  {...sectionSelectionCounts(selected, diskCategories)}
+                                  allSelected={sectionAllSelected(selected, diskCategories)}
+                                  onToggle={() =>
+                                    sectionAllSelected(selected, diskCategories)
+                                      ? deselectSection(diskCategories)
+                                      : selectSection(diskCategories)
+                                  }
+                                />
+                              </div>
+                            ) : undefined
+                          }
+                        >
+                          {diskCategories.map((cat, i) => (
+                            <CategoryCard
+                              key={cat.id}
+                              category={cat}
+                              selected={selected.has(cat.id)}
+                              onToggle={toggleCategory}
+                              index={i}
+                              selectable={isCategorySelectable(cat)}
+                            />
+                          ))}
+                        </CollapsibleScanSection>
+                      )}
+
+                      {privacyCategories.length > 0 && (
+                        <CollapsibleScanSection
+                          title="privacy & sessions"
+                          subtitle="not selected by default — signs you out of websites; passwords stay"
+                          titleClassName="text-neon-purple"
+                          accent="purple"
+                          sizeSummary={sectionSizeTotals(selected, privacyCategories)}
+                          sizeAccentClassName="text-white/55"
+                          className="pt-2"
+                          open={privacySectionOpen}
+                          onToggle={() => setPrivacySectionOpen((open) => !open)}
+                          headerAction={
+                            canAct &&
+                            (selectablePrivacyCategories.length > 0 ||
+                              secureExitAvailable(categories)) ? (
+                              <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+                                {secureExitAvailable(categories) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowSecureExitModal(true)}
+                                    className="flex items-center gap-1.5 rounded-full border border-neon-purple/35 bg-neon-purple/10 px-3 py-1.5 text-xs font-medium text-neon-purple transition-colors hover:bg-neon-purple/20"
+                                  >
+                                    <LogOut size={12} />
+                                    secure exit
+                                  </button>
+                                )}
+                                {selectablePrivacyCategories.length > 0 && (
+                                  <SectionSelectionBar
+                                    accent="purple"
+                                    {...sectionSelectionCounts(selected, privacyCategories)}
+                                    allSelected={sectionAllSelected(
+                                      selected,
+                                      privacyCategories,
+                                    )}
+                                    onToggle={() =>
+                                      sectionAllSelected(selected, privacyCategories)
+                                        ? deselectSection(privacyCategories)
+                                        : selectSection(privacyCategories)
+                                    }
+                                  />
+                                )}
+                              </div>
+                            ) : undefined
+                          }
+                        >
+                          {privacyCategories.map((cat, i) => (
+                            <CategoryCard
+                              key={cat.id}
+                              category={cat}
+                              selected={selected.has(cat.id)}
+                              onToggle={toggleCategory}
+                              index={i}
+                              selectable={isCategorySelectable(cat)}
+                            />
+                          ))}
+                        </CollapsibleScanSection>
+                      )}
+
+                      {miscCategories.length > 0 && (
+                        <CollapsibleScanSection
+                          title="misc"
+                          subtitle="not selected by default — downloads and DNS flush"
+                          titleClassName="text-amber-300/70"
+                          accent="amber"
+                          sizeSummary={sectionSizeTotals(selected, miscCategories)}
+                          sizeAccentClassName="text-amber-300/80"
+                          className="pt-2"
+                          open={miscSectionOpen}
+                          onToggle={() => setMiscSectionOpen((open) => !open)}
+                          headerAction={
+                            canAct && selectableMiscCategories.length > 0 ? (
+                              <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+                                <SectionSelectionBar
+                                  accent="amber"
+                                  {...sectionSelectionCounts(selected, miscCategories)}
+                                  allSelected={sectionAllSelected(selected, miscCategories)}
+                                  onToggle={() =>
+                                    sectionAllSelected(selected, miscCategories)
+                                      ? deselectSection(miscCategories)
+                                      : selectSection(miscCategories)
+                                  }
+                                />
+                              </div>
+                            ) : undefined
+                          }
+                        >
+                          {miscCategories.map((cat, i) => (
+                            <CategoryCard
+                              key={cat.id}
+                              category={cat}
+                              selected={selected.has(cat.id)}
+                              onToggle={toggleCategory}
+                              index={i}
+                              selectable={isCategorySelectable(cat)}
+                            />
+                          ))}
+                        </CollapsibleScanSection>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -566,6 +869,26 @@ function App() {
                               <span className="font-semibold text-white">
                                 {formatBytes(totalSize)}
                               </span>
+                              {selectedIncludesPrivacy(selected) && (
+                                <span className="mt-1 block text-xs text-neon-pink/80">
+                                  privacy selected — you will be signed out of sites
+                                </span>
+                              )}
+                              {selectedIncludesDns(selected) && (
+                                <span className="mt-1 block text-xs text-amber-300/80">
+                                  DNS cache will be flushed on yeet
+                                </span>
+                              )}
+                              {selectedIncludesDownloads(selected) && (
+                                <span className="mt-1 block text-xs text-amber-300/80">
+                                  downloads folder selected — confirmation required
+                                </span>
+                              )}
+                              {selectedIncludesThumbnail(selected) && (
+                                <span className="mt-1 block text-xs text-neon-cyan/75">
+                                  thumbnail cache — locked files queue for restart
+                                </span>
+                              )}
                             </>
                           ) : (
                             <span className="text-white/40">
@@ -592,22 +915,26 @@ function App() {
                         </motion.button>
                       )}
 
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={requestScan}
                         disabled={checkingBlockers || phase === "cleaning"}
-                        className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-4 py-2.5 text-sm text-white/60 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-purple to-neon-pink px-5 py-2.5 font-display text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        <RotateCcw size={14} />
+                        <RotateCcw size={16} />
                         rescan
-                      </button>
+                      </motion.button>
 
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={reset}
                         disabled={phase === "cleaning"}
-                        className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-4 py-2.5 text-sm text-white/60 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-pink to-neon-cyan px-5 py-2.5 font-display text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         start over
-                      </button>
+                      </motion.button>
                     </div>
                   )}
 
@@ -630,7 +957,7 @@ function App() {
           </AnimatePresence>
         </main>
 
-        <footer className="relative z-10 mt-2 shrink-0 text-center text-[10px] leading-relaxed text-white/25">
+        <footer className="relative z-10 mt-2 shrink-0 text-center text-[10px] leading-relaxed text-white/45">
           {APP_NAME} · © {new Date().getFullYear()} {COMPANY_NAME} · free under MIT License
         </footer>
       </div>

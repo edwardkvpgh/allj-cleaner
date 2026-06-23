@@ -84,6 +84,10 @@ function formatCleanSummary(result: CleanResult, before: ScanCategory[]): string
     parts.push(`${result.files_removed.toLocaleString()} items yeeted`);
   }
 
+  if (result.categories_cleaned.includes("dns_cache")) {
+    parts.push("DNS cache flushed");
+  }
+
   if (parts.length === 0 && cleanedNames) {
     return `cleared ${cleanedNames}`;
   }
@@ -107,6 +111,14 @@ function hasLockIssues(result: CleanResult) {
   );
 }
 
+function hasThumbnailReboot(result: CleanResult, before: ScanCategory[]): boolean {
+  return (
+    result.files_scheduled_reboot > 0 &&
+    result.categories_cleaned.includes("thumbnail_cache") &&
+    before.some((category) => category.id === "thumbnail_cache")
+  );
+}
+
 export function getCleanBanner(result: CleanResult, before: ScanCategory[] = []) {
   const hasRemoved = result.files_removed > 0 || result.freed_bytes > 0;
   const hasCleanedCategories = result.categories_cleaned.length > 0;
@@ -115,6 +127,10 @@ export function getCleanBanner(result: CleanResult, before: ScanCategory[] = [])
   const lockIssues = hasLockIssues(result);
   const isPartial = lockIssues || hasScheduled;
   const summary = formatCleanSummary(result, before);
+  const thumbnailReboot = hasThumbnailReboot(result, before);
+  const explorerTip = thumbnailReboot
+    ? "restart File Explorer or reboot to finish thumbnail cleanup"
+    : null;
 
   if ((hasRemoved || hasCleanedCategories) && !isPartial) {
     return {
@@ -147,7 +163,7 @@ export function getCleanBanner(result: CleanResult, before: ScanCategory[] = [])
       ]
         .filter(Boolean)
         .join(" · "),
-      tip: "close blocking apps below, then yeet again",
+      tip: explorerTip ?? "close blocking apps below, then yeet again",
       showCloseApps: true,
     };
   }
@@ -170,8 +186,8 @@ export function getCleanBanner(result: CleanResult, before: ScanCategory[] = [])
           .join(" · ")
       : result.errors[0] ?? "no files could be removed",
     tip: lockIssues
-      ? "tap find blocking apps to pick what to close"
-      : "close other apps using temp files, then rescan & yeet again",
+      ? explorerTip ?? "tap find blocking apps to pick what to close"
+      : explorerTip ?? "close other apps using temp files, then rescan & yeet again",
     showCloseApps: lockIssues,
   };
 }

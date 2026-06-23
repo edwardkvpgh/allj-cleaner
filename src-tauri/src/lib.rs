@@ -8,6 +8,7 @@ mod recycle_bin;
 mod safety;
 mod scanner;
 mod single_instance;
+mod system_clean;
 
 use models::{CleanResult, CloseAppsResult, InterferenceApp, LockingApp, ScanCategory};
 use paths::{resolve_category_paths, CATEGORIES};
@@ -33,6 +34,12 @@ fn category_available(def_id: &str, resolved: &[std::path::PathBuf]) -> bool {
     if def_id == "recycle_bin" || def_id == "clipboard" {
         return true;
     }
+    if def_id == "dns_cache" {
+        return paths::is_action_category(def_id) && cfg!(windows);
+    }
+    if paths::is_browser_privacy_category(def_id) {
+        return paths::browser_privacy_installed(def_id);
+    }
     !resolved.is_empty() && resolved.iter().any(|p| p.exists())
 }
 
@@ -56,6 +63,8 @@ fn scan_all() -> Vec<ScanCategory> {
                     vec!["Recycle Bin".to_string()]
                 } else if def.id == "clipboard" {
                     vec!["Windows Clipboard".to_string()]
+                } else if def.id == "dns_cache" {
+                    vec!["Windows DNS resolver cache".to_string()]
                 } else {
                     resolved
                         .iter()
@@ -97,6 +106,38 @@ fn force_close_apps(apps: Vec<LockingApp>) -> CloseAppsResult {
     process_manager::force_close_apps(&apps)
 }
 
+#[tauri::command]
+fn open_downloads_in_explorer() -> Result<(), String> {
+    paths::open_downloads_in_explorer()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::paths::{resolve_category_paths, CATEGORIES};
+
+    #[test]
+    fn scan_all_does_not_panic() {
+        let results = scan_all();
+        assert!(!results.is_empty());
+    }
+
+    #[test]
+    fn scan_each_category_individually() {
+        for def in CATEGORIES {
+            let resolved = resolve_category_paths(def.id);
+            let _stats = scan_category(def.id, &resolved);
+            eprintln!("scanned {}", def.id);
+        }
+    }
+
+    #[test]
+    fn clipboard_scan_does_not_corrupt_heap() {
+        let stats = clipboard::scan();
+        eprintln!("clipboard scan: {} bytes, {} items", stats.size_bytes, stats.file_count);
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     if !single_instance::acquire_or_prompt() {
@@ -111,7 +152,8 @@ pub fn run() {
             get_pre_scan_apps,
             get_interference_apps,
             get_locking_apps,
-            force_close_apps
+            force_close_apps,
+            open_downloads_in_explorer
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

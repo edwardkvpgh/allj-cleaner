@@ -5,6 +5,7 @@ use crate::reboot_delete;
 use crate::recycle_bin;
 use crate::safety::{is_safe_target, resolved_roots};
 use crate::scanner::scan_paths;
+use crate::system_clean;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::thread;
@@ -47,6 +48,14 @@ pub fn clean_categories(category_ids: &[String]) -> CleanResult {
                 }
                 Ok(_) => {}
                 Err(err) => result.errors.push(format!("Clipboard: {err}")),
+            }
+            continue;
+        }
+
+        if id == "dns_cache" {
+            match system_clean::flush_dns_cache() {
+                Ok(()) => result.categories_cleaned.push(id.clone()),
+                Err(err) => result.errors.push(format!("DNS cache: {err}")),
             }
             continue;
         }
