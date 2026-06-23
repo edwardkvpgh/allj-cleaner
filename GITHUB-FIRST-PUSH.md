@@ -110,9 +110,16 @@ git push https://edwardkvpgh:PASTE_YOUR_TOKEN_HERE@github.com/edwardkvpgh/allj-c
 git fetch origin
 git branch --set-upstream-to=origin/main main
 
-### Option B — SSH
+### Option B — SSH  (The best, try later)
 
 ```powershell
+
+Generate a key: https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+
+Add the public key to GitHub: https://github.com/settings/keys
+
+Switch remote:
+
 git remote set-url origin git@github.com:edwardkvpgh/allj-cleaner.git
 git push -u origin main
 ```
@@ -127,8 +134,13 @@ For later changes:
 
 ```powershell
 git add .
-git commit -m "Describe what you changed"
+git commit -m "Mention here what you changed"
 git push
+
+Or
+
+git push https://edwardkvpgh:PASTE_YOUR_TOKEN_HERE@github.com/edwardkvpgh/allj-cleaner.git main
+
 ```
 
 ---
