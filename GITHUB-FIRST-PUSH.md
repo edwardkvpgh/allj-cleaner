@@ -86,20 +86,30 @@ GitHub **does not** accept account passwords for push. Use one option below.
 
 ## Authentication (pick one)
 
-### Option A — GitHub CLI (easiest)
+### Option A — HTTPS + Personal Access Token    (Use this option )
 
-```powershell
-gh auth login
-git push -u origin main
-```
+Create a GitHub token    
 
-### Option B — HTTPS + Personal Access Token
+1. Open: https://github.com/settings/tokens
+2. Generate new token → Generate new token (classic)
+3. Name it something like "EDDYs Cleaner Push"
+4. Check repo (full control of private repositories)
+5. Generate and copy the token — you won’t see it again
 
-1. GitHub → **Settings** → **Developer settings** → **Personal access tokens**
-2. Create a token with `repo` scope
-3. When `git push` asks for a password, paste the **token** (not your GitHub password)
+6) git credential-manager github login
 
-### Option C — SSH
+7) Push
+
+Replace PASTE_YOUR_TOKEN_HERE with your real token:
+
+git push https://edwardkvpgh:PASTE_YOUR_TOKEN_HERE@github.com/edwardkvpgh/allj-cleaner.git main
+ 
+
+7)  Set upstream for future pushes
+
+git branch --set-upstream-to=origin/main main
+
+### Option B — SSH
 
 ```powershell
 git remote set-url origin git@github.com:edwardkvpgh/allj-cleaner.git
@@ -152,7 +162,7 @@ Or ask in chat:
 | Problem | Fix |
 |---------|-----|
 | `remote origin already exists` | `git remote set-url origin https://github.com/edwardkvpgh/allj-cleaner.git` |
-| `failed to push — rejected` | Remote may have a README commit; pull first or force only if you intend to overwrite empty repo |
+| `push declined due to repository rule violations` | A secret (e.g. token) was committed — remove it from the file, amend commit, revoke token on GitHub, push again |
 | `Authentication failed` | Use PAT or `gh auth login`, not account password |
 | Huge commit / slow push | Run `git status` — ensure `node_modules` and `target` are ignored |
 
