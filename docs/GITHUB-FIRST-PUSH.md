@@ -1,9 +1,11 @@
-# GitHub First Push — Tomorrow's Setup
+# GitHub First Push — Initial Repository Setup
 
 **Created:** 2026-06-22  
 **Repository:** [edwardkvpgh/allj-cleaner](https://github.com/edwardkvpgh/allj-cleaner)  
 **Local folder:** `c:\Users\Emd\Downloads\ALLJ-Cleaner`  
-**Status:** Not a git repo yet — remote is empty — straightforward first push.
+**Audience:** **Repo owner** — first push when the project folder is **not** a git repo yet (or remote was empty)
+
+**Joining as a teammate?** The repo already exists — use **[GITHUB-TEAM-ONBOARDING.md](./GITHUB-TEAM-ONBOARDING.md)** (clone, pull, setup, first push on a branch).
 
 ---
 
@@ -156,6 +158,14 @@ git push https://edwardkvpgh:PASTE_YOUR_TOKEN_HERE@github.com/edwardkvpgh/allj-c
 | Stage | `git add .` |
 | Commit | `git commit -m "Initial commit: EDdys Cleaner desktop app"` |
 | Push | `git push -u origin main` |
+
+---
+
+## Related docs
+
+| Document | Use when |
+|----------|----------|
+| [GITHUB-TEAM-ONBOARDING.md](./GITHUB-TEAM-ONBOARDING.md) | New teammate clones repo on another laptop |
 
 ---
 

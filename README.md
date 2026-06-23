@@ -92,11 +92,14 @@ Full stack details: **[TECH-STACK.md](./docs/TECH-STACK.md)** · Product roadmap
 
 | Version | Focus | Status |
 |---------|-------|--------|
-| **v0.1 MVP** | Temp, Recycle Bin, Chrome/Edge, preview UI, app force-close | ✅ **Current** |
-| **v0.2** | Firefox, Brave, thumbnail/app caches, tray, scheduler, admin mode | 🔲 Planned |
-| **v0.3** | macOS/Linux, smart rules, portable edition, code signing | 🔲 Future |
+| **v0.1** | Temp, Recycle Bin, Chrome/Edge cache, clipboard, preview UI, blocking-app force-close | ✅ Shipped |
+| **v0.2** | Firefox/Brave cache, thumbnail & app caches (Teams, Discord, Spotify), **Privacy & sessions**, Secure exit, Misc (Downloads, DNS), sectioned scan UI | ✅ **Current** |
+| **v0.3** | System tray, scheduled cleaning, admin mode (system caches), settings & exclusions, expandable error log, AppData discovery ([Phase 5](./docs/SECURITY-PRIVACY-ROADMAP.md)) | 🔲 Planned |
+| **v0.4** | PI (Performance) tune-up ([roadmap](./docs/PERFORMANCE-TOOL-ROADMAP.md)), macOS/Linux, smart clean rules, portable edition, code signing | 🔲 Future |
 
-See [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) for the full feature list per version. Privacy work is detailed in [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md).
+**Note:** Older docs grouped Firefox/Brave caches with tray, scheduler, and admin mode under “v0.2.” Those ship targets are split above: **privacy and expanded disk junk are v0.2 (current)**; **tray, scheduler, and admin mode move to v0.3.**
+
+Detail: [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) · Privacy: [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) · Performance: [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md)
 
 ---
 
@@ -257,17 +260,31 @@ Windows often locks temp files while apps are running. If you see **partially ye
 
 ---
 
-## MVP Features (v0.1)
+## Version history
+
+### v0.1 (shipped)
 
 - User temp folder scan & clean
 - Recycle Bin empty (Windows Shell API)
 - Google Chrome & Microsoft Edge cache clean
+- Clipboard clear
 - Preview with per-category toggles
 - Safe path validation (won't touch system folders)
 - Partial clean / skipped file reporting
 - Detect blocking apps → confirm → force close
 - Delete locked files on next reboot
 - `start.bat` / `run.bat` / `build.bat` launchers
+
+### v0.2 (current)
+
+Everything in v0.1, plus:
+
+- Firefox & Brave browser cache
+- Thumbnail cache (Explorer previews; delete-on-reboot if locked)
+- App caches: Teams, Discord, Spotify
+- **Privacy & sessions** — cookies, history & downloads list, site storage (Chrome, Edge, Brave, Firefox)
+- **Secure exit** preset, **Quick clean**, **Misc** (Downloads folder + DNS flush)
+- Disk / Privacy / Misc sections, opt-in privacy & misc by default
 
 ---
 
@@ -277,11 +294,12 @@ All documentation lives in the [`docs/`](./docs/) folder.
 
 | Document | Contents |
 |----------|----------|
-| [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) | Original product proposal, architecture overview, v0.1 / v0.2 / v0.3 roadmap |
+| [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) | Original product proposal, architecture overview, v0.1–v0.4 roadmap |
 | [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) | Privacy & sessions implementation guide — browser sign-out, secure exit, DNS, phased delivery |
 | [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md) | PI (Performance) menu — startup apps, background apps, outdated apps/drivers; feasibility and phased plan |
 | [TECH-STACK.md](./docs/TECH-STACK.md) | Full tech stack (Tauri, React, Rust, tooling) and purpose of each component |
-| [GITHUB-FIRST-PUSH.md](./docs/GITHUB-FIRST-PUSH.md) | First-time Git setup, push workflow, and useful git commands |
+| [GITHUB-FIRST-PUSH.md](./docs/GITHUB-FIRST-PUSH.md) | Repo owner: first-time git init and initial push to GitHub |
+| [GITHUB-TEAM-ONBOARDING.md](./docs/GITHUB-TEAM-ONBOARDING.md) | New teammate: clone, dev setup, pull, branch, commit, first push |
 | [LICENSE.md](./LICENSE.md) | MIT License — free to use, modify, and distribute |
 
 ---

@@ -2,7 +2,7 @@
 
 A standalone desktop application for scanning and cleaning browser caches, OS temporary files, and other reclaimable disk space on Windows (with optional cross-platform expansion later).
 
-**Current release:** MVP v0.1
+**Current release:** v0.2 (privacy & expanded disk junk)
 
 ---
 
@@ -109,7 +109,7 @@ Users need a **safe, transparent tool** that shows what will be deleted, how muc
 
 ## Development Roadmap
 
-### Version 0.1 — MVP (current)
+### Version 0.1 — MVP
 
 **Status: shipped**
 
@@ -120,6 +120,7 @@ Users need a **safe, transparent tool** that shows what will be deleted, how muc
 | Recycle Bin scan & empty (Shell API) | ✅ Done |
 | Google Chrome cache clean | ✅ Done |
 | Microsoft Edge cache clean | ✅ Done |
+| Clipboard clear | ✅ Done |
 | Scan → preview → selective clean UI | ✅ Done |
 | Gen Z trendy dark UI | ✅ Done |
 | Safe path validation | ✅ Done |
@@ -130,20 +131,24 @@ Users need a **safe, transparent tool** that shows what will be deleted, how muc
 | `start.bat` / `run.bat` / `build.bat` launchers | ✅ Done |
 | Windows `.exe` / installer build | ✅ Done |
 
-### Version 0.2 — Enhanced
+### Version 0.2 — Privacy & expanded disk junk
 
-**Status: planned**
+**Status: current (shipped)**
 
 | Feature | Status |
 |---------|--------|
-| Firefox cache clean | ✅ Shipped |
-| Brave cache clean | ✅ Shipped |
-| Thumbnail cache clean | ✅ Shipped |
-| Common app caches (Teams, Discord, Spotify) | ✅ Shipped |
+| Firefox cache clean | ✅ Done |
+| Brave cache clean | ✅ Done |
+| Thumbnail cache clean | ✅ Done |
+| Common app caches (Teams, Discord, Spotify) | ✅ Done |
+| Privacy & sessions (Chrome, Edge, Brave, Firefox) | ✅ Done |
+| Secure exit preset | ✅ Done |
+| Misc: Downloads folder + DNS flush | ✅ Done |
+| Disk / Privacy / Misc sectioned UI | ✅ Done |
 
-### Version 0.3 — Pending (Optional)
+### Version 0.3 — Platform & power features
 
-**Status: pending / optional**
+**Status: planned**
 
 | Feature | Status |
 |---------|--------|
@@ -152,15 +157,17 @@ Users need a **safe, transparent tool** that shows what will be deleted, how muc
 | Admin-mode for Windows system caches | 🔲 Planned |
 | Settings: exclusions, defaults, Recycle Bin preference | 🔲 Planned |
 | Expandable error log in UI | 🔲 Planned |
+| Discovered large AppData folders (SECURITY-PRIVACY Phase 5) | 🔲 Planned |
 
-### Version 0.4 — Pending (future)
+### Version 0.4 — Cross-platform & distribution
 
-**Status: optional / future**
+**Status: future**
 
 | Feature | Status |
 |---------|--------|
 | macOS support via Tauri | 🔲 Future |
 | Linux support via Tauri | 🔲 Future |
+| PI (Performance) tune-up menu | 🔲 Future |
 | “Smart clean” rules (e.g. files older than 30 days) | 🔲 Future |
 | Cloud sync of **preferences only** (not user files) | 🔲 Future |
 | Portable (no-install) edition | 🔲 Future |
@@ -279,8 +286,8 @@ EDdys-Cleaner/
 |----------|--------|
 | **Product type** | Standalone desktop application |
 | **Primary stack** | Tauri 2 + React + TypeScript + Rust |
-| **Target OS (v0.1)** | Windows 10 / 11 |
-| **Current version** | MVP v0.1 |
+| **Target OS** | Windows 10 / 11 (v0.1–v0.3); macOS/Linux in v0.4 |
+| **Current version** | v0.2 |
 | **License** | MIT (free) |
 
 ---
