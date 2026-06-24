@@ -21,18 +21,22 @@ import { DownloadsConfirmModal } from "./components/DownloadsConfirmModal";
 import { NoAppsFoundModal } from "./components/NoAppsFoundModal";
 import { CollapsibleScanSection } from "./components/CollapsibleScanSection";
 import { SectionSelectionBar } from "./components/SectionSelectionBar";
+import { SectionSortButton } from "./components/SectionSortButton";
 import type { AppPhase, CleanResult, InterferenceApp, LockingApp, ScanCategory } from "./types";
 import { APP_NAME, COMPANY_NAME } from "./constants/brand";
 import { formatBytes } from "./utils/format";
 import {
   sortCategoriesBySize,
+  sortCategoriesForSection,
   partitionCategories,
+  type SectionSortMode,
   defaultSelectedCategoryIds,
   isCategorySelectable,
   sectionAllSelected,
   sectionSelectionCounts,
   sectionSizeTotals,
   sectionSelectableCategories,
+  sectionSelectedIds,
   secureExitAvailable,
   selectedIncludesDns,
   selectedIncludesDownloads,
@@ -69,6 +73,8 @@ function App() {
   const [diskSectionOpen, setDiskSectionOpen] = useState(false);
   const [privacySectionOpen, setPrivacySectionOpen] = useState(false);
   const [miscSectionOpen, setMiscSectionOpen] = useState(false);
+  const [diskSort, setDiskSort] = useState<SectionSortMode>("size-desc");
+  const [privacySort, setPrivacySort] = useState<SectionSortMode>("size-desc");
   const [dismissedBlockingPrompt, setDismissedBlockingPrompt] = useState(false);
 
   const clearBlockingState = useCallback(() => {
@@ -118,6 +124,26 @@ function App() {
   const selectableMiscCategories = useMemo(
     () => sectionSelectableCategories(miscCategories),
     [miscCategories],
+  );
+
+  const displayedDiskCategories = useMemo(
+    () => sortCategoriesForSection(diskCategories, diskSort),
+    [diskCategories, diskSort],
+  );
+
+  const displayedPrivacyCategories = useMemo(
+    () => sortCategoriesForSection(privacyCategories, privacySort),
+    [privacyCategories, privacySort],
+  );
+
+  const diskSectionSelectedIds = useMemo(
+    () => sectionSelectedIds(selected, diskCategories),
+    [selected, diskCategories],
+  );
+
+  const privacySectionSelectedIds = useMemo(
+    () => sectionSelectedIds(selected, privacyCategories),
+    [selected, privacyCategories],
   );
 
   const setSortedCategories = useCallback((next: ScanCategory[]) => {
@@ -464,6 +490,8 @@ function App() {
     setSelected(new Set());
     setCleanResult(null);
     setPreCleanCategories([]);
+    setDiskSort("size-desc");
+    setPrivacySort("size-desc");
   }, [clearBlockingState]);
 
   const isLoading = phase === "scanning" || phase === "cleaning";
@@ -572,13 +600,15 @@ function App() {
 
         <SecureExitModal
           open={showSecureExitModal}
-          categories={privacyCategories}
+          categories={displayedPrivacyCategories}
+          initialSelectedIds={privacySectionSelectedIds}
           onCancel={() => setShowSecureExitModal(false)}
           onConfirm={handleSecureExitConfirm}
         />
         <QuickCleanModal
           open={showQuickCleanModal}
-          categories={diskCategories}
+          categories={displayedDiskCategories}
+          initialSelectedIds={diskSectionSelectedIds}
           onCancel={() => setShowQuickCleanModal(false)}
           onConfirm={handleQuickCleanConfirm}
         />
@@ -720,6 +750,11 @@ function App() {
                           headerAction={
                             canAct && selectableDiskCategories.length > 0 ? (
                               <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+                                <SectionSortButton
+                                  mode={diskSort}
+                                  onChange={setDiskSort}
+                                  accent="cyan"
+                                />
                                 <button
                                   type="button"
                                   onClick={handleQuickCleanSelect}
@@ -739,10 +774,16 @@ function App() {
                                   }
                                 />
                               </div>
+                            ) : diskCategories.length > 0 ? (
+                              <SectionSortButton
+                                mode={diskSort}
+                                onChange={setDiskSort}
+                                accent="cyan"
+                              />
                             ) : undefined
                           }
                         >
-                          {diskCategories.map((cat, i) => (
+                          {displayedDiskCategories.map((cat, i) => (
                             <CategoryCard
                               key={cat.id}
                               category={cat}
@@ -771,6 +812,11 @@ function App() {
                             (selectablePrivacyCategories.length > 0 ||
                               secureExitAvailable(categories)) ? (
                               <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+                                <SectionSortButton
+                                  mode={privacySort}
+                                  onChange={setPrivacySort}
+                                  accent="purple"
+                                />
                                 {secureExitAvailable(categories) && (
                                   <button
                                     type="button"
@@ -797,10 +843,16 @@ function App() {
                                   />
                                 )}
                               </div>
+                            ) : privacyCategories.length > 0 ? (
+                              <SectionSortButton
+                                mode={privacySort}
+                                onChange={setPrivacySort}
+                                accent="purple"
+                              />
                             ) : undefined
                           }
                         >
-                          {privacyCategories.map((cat, i) => (
+                          {displayedPrivacyCategories.map((cat, i) => (
                             <CategoryCard
                               key={cat.id}
                               category={cat}

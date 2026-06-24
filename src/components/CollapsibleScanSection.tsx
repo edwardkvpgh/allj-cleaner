@@ -6,10 +6,10 @@ function CompactSizeAmount({ bytes }: { bytes: number }) {
   const { value, unit } = formatBytesCompactParts(bytes);
 
   return (
-    <>
-      <span className="font-body font-normal">{value}</span>
-      <span className="font-display text-[10px] font-bold tracking-wide">{unit}</span>
-    </>
+    <span className="font-size-num inline-flex items-baseline">
+      <span className="font-normal">{value}</span>
+      <span className="text-[10px] font-semibold tracking-wide">{unit}</span>
+    </span>
   );
 }
 

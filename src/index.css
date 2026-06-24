@@ -76,4 +76,18 @@
     -webkit-app-region: no-drag;
     app-region: no-drag;
   }
+
+  /* Size labels: distinguish 0 from O (section headers, etc.) */
+  .font-size-num {
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      "SF Mono",
+      Menlo,
+      Consolas,
+      "Liberation Mono",
+      monospace;
+    font-variant-numeric: tabular-nums slashed-zero;
+    font-feature-settings: "tnum" 1, "zero" 1;
+  }
 }

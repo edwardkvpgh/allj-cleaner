@@ -81,6 +81,34 @@ export function sortCategoriesBySize(categories: ScanCategory[]): ScanCategory[]
   });
 }
 
+export type SectionSortMode = "size-desc" | "name-asc" | "name-desc";
+
+export function sortCategoriesByName(
+  categories: ScanCategory[],
+  direction: "asc" | "desc",
+): ScanCategory[] {
+  return [...categories].sort((a, b) => {
+    if (a.available !== b.available) {
+      return a.available ? -1 : 1;
+    }
+    const cmp = a.name.localeCompare(b.name);
+    return direction === "asc" ? cmp : -cmp;
+  });
+}
+
+export function sortCategoriesForSection(
+  categories: ScanCategory[],
+  mode: SectionSortMode,
+): ScanCategory[] {
+  if (mode === "size-desc") {
+    return sortCategoriesBySize(categories);
+  }
+  if (mode === "name-asc") {
+    return sortCategoriesByName(categories, "asc");
+  }
+  return sortCategoriesByName(categories, "desc");
+}
+
 export function partitionCategories(categories: ScanCategory[]) {
   const disk: ScanCategory[] = [];
   const privacy: ScanCategory[] = [];
@@ -194,4 +222,12 @@ export function sectionAnySelected(
   sectionCategories: ScanCategory[],
 ): boolean {
   return sectionCategories.some((category) => selected.has(category.id));
+}
+
+export function sectionSelectedIds(
+  selected: Set<string>,
+  sectionCategories: ScanCategory[],
+): Set<string> {
+  const sectionIds = new Set(sectionCategories.map((category) => category.id));
+  return new Set([...selected].filter((id) => sectionIds.has(id)));
 }

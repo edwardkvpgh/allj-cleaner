@@ -99,7 +99,7 @@ Full stack details: **[TECH-STACK.md](./docs/TECH-STACK.md)** · Product roadmap
 
 **Note:** Older docs grouped Firefox/Brave caches with tray, scheduler, and admin mode under “v0.2.” Those ship targets are split above: **privacy and expanded disk junk are v0.2 (current)**; **tray, scheduler, and admin mode move to v0.3.**
 
-Detail: [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) · Privacy: [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) · Performance: [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md)
+Detail: [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) · Privacy: [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) · Performance: [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md) · Future: [FUTURE-TODO-LIST.md](./docs/FUTURE-TODO-LIST.md)
 
 ---
 
@@ -290,17 +290,18 @@ Everything in v0.1, plus:
 
 ## Project docs
 
-All documentation lives in the [`docs/`](./docs/) folder.
+All documentation lives in the [`docs/`](./docs/) folder. This index is maintained per [`.cursor/skills/docs/SKILL.md`](./.cursor/skills/docs/SKILL.md) — use **`/docs`** in chat when adding or updating documentation.
 
-| Document | Contents |
-|----------|----------|
-| [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) | Original product proposal, architecture overview, v0.1–v0.4 roadmap |
-| [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) | Privacy & sessions implementation guide — browser sign-out, secure exit, DNS, phased delivery |
-| [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md) | PI (Performance) menu — startup apps, background apps, outdated apps/drivers; feasibility and phased plan |
-| [TECH-STACK.md](./docs/TECH-STACK.md) | Full tech stack (Tauri, React, Rust, tooling) and purpose of each component |
-| [GITHUB-FIRST-PUSH.md](./docs/GITHUB-FIRST-PUSH.md) | Repo owner: first-time git init and initial push to GitHub |
-| [GITHUB-TEAM-ONBOARDING.md](./docs/GITHUB-TEAM-ONBOARDING.md) | New teammate: clone, dev setup, pull, branch, commit, first push |
-| [LICENSE.md](./LICENSE.md) | MIT License — free to use, modify, and distribute |
+| Document | Contents | Status |
+|----------|----------|--------|
+| [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) | Original product proposal, architecture overview, version roadmap v0.1–v0.4 | 📖 Reference |
+| [TECH-STACK.md](./docs/TECH-STACK.md) | Full tech stack (Tauri, React, Rust, tooling) and purpose of each component | 📖 Reference |
+| [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) | Privacy & sessions, Secure exit, DNS, Misc, Phase 5 AppData discovery — implementation guide | ✅ Shipped (v0.2) |
+| [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md) | PI (Performance) menu — startup apps, background apps, outdated apps/drivers | 🔲 Future |
+| [FUTURE-TODO-LIST.md](./docs/FUTURE-TODO-LIST.md) | Planned features: **Downloads picker** (Misc — list/select/delete, v0.2.x); unified bookmark, password, and extension managers (post v0.3+) | 🔲 Planned |
+| [GITHUB-FIRST-PUSH.md](./docs/GITHUB-FIRST-PUSH.md) | Repo owner: first-time git init and initial push to GitHub | 📖 Reference |
+| [GITHUB-TEAM-ONBOARDING.md](./docs/GITHUB-TEAM-ONBOARDING.md) | New teammate: clone, dev setup, pull, branch, commit, first push | 📖 Reference |
+| [LICENSE.md](./LICENSE.md) | MIT License — free to use, modify, and distribute | 📖 Reference |
 
 ---
 

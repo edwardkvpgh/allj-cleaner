@@ -8,6 +8,7 @@ import { SectionSelectionBar } from "./SectionSelectionBar";
 interface SecureExitModalProps {
   open: boolean;
   categories: ScanCategory[];
+  initialSelectedIds: Set<string>;
   onCancel: () => void;
   onConfirm: (selectedIds: Set<string>) => void;
 }
@@ -15,6 +16,7 @@ interface SecureExitModalProps {
 export function SecureExitModal({
   open,
   categories,
+  initialSelectedIds,
   onCancel,
   onConfirm,
 }: SecureExitModalProps) {
@@ -27,9 +29,9 @@ export function SecureExitModal({
 
   useEffect(() => {
     if (open) {
-      setSelectedIds(new Set(selectableCategories.map((category) => category.id)));
+      setSelectedIds(new Set(initialSelectedIds));
     }
-  }, [open, selectableCategories]);
+  }, [open, initialSelectedIds]);
 
   if (typeof document === "undefined" || !open) {
     return null;
