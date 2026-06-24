@@ -21,7 +21,7 @@ Add optional, user-controlled cleanup for **browser session & privacy data** —
 
 1. **Preview before delete** — same trust model as existing categories.
 2. **Opt-in per category** — user picks what to clear.
-3. **Browser must be closed** — reuse blocking-app flow where needed.
+3. **Browser must be closed** — scoped per-category dependency checks (only the relevant browser or app for selected rows); blocking-app modal or advisory before yeet.
 4. **Safe paths only** — whitelist known profile locations; never touch unrelated user files.
 5. **Hard denylist** — never delete password, bookmark, or extension data (enforced in `safety.rs`, not UI alone).
 6. **Saved passwords stay off** — no password-clear category in v1; defer “advanced” toggle until explicit design review.

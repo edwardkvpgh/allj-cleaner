@@ -10,6 +10,14 @@ export interface ScanCategory {
   warning: string | null;
 }
 
+export interface DownloadEntry {
+  path: string;
+  name: string;
+  is_dir: boolean;
+  size_bytes: number;
+  file_count: number;
+}
+
 export interface CleanResult {
   freed_bytes: number;
   files_removed: number;

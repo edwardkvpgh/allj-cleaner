@@ -14,6 +14,15 @@ pub struct ScanCategory {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DownloadEntry {
+    pub path: String,
+    pub name: String,
+    pub is_dir: bool,
+    pub size_bytes: u64,
+    pub file_count: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CleanResult {
     pub freed_bytes: u64,
     pub files_removed: u64,

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,6 +18,7 @@ import { TempCleanPrompt } from "./components/TempCleanPrompt";
 import { SecureExitModal } from "./components/SecureExitModal";
 import { QuickCleanModal } from "./components/QuickCleanModal";
 import { DownloadsConfirmModal } from "./components/DownloadsConfirmModal";
+import { CleanConfirmModal, type CleanConfirmVariant } from "./components/CleanConfirmModal";
 import { NoAppsFoundModal } from "./components/NoAppsFoundModal";
 import { CollapsibleScanSection } from "./components/CollapsibleScanSection";
 import { SectionSelectionBar } from "./components/SectionSelectionBar";
@@ -32,7 +33,7 @@ import {
   type SectionSortMode,
   defaultSelectedCategoryIds,
   isCategorySelectable,
-  sectionAllSelected,
+  sectionAnySelected,
   sectionSelectionCounts,
   sectionSizeTotals,
   sectionSelectableCategories,
@@ -43,12 +44,18 @@ import {
   selectedIncludesThumbnail,
   selectedIncludesPrivacy,
 } from "./utils/categories";
-import { closeableInterferenceApps, filterCloseableLockingApps } from "./utils/apps";
+import { closeableInterferenceApps, displayAppName, filterCloseableLockingApps } from "./utils/apps";
 import {
   enrichCleanResult,
   getCleanBanner,
   hasCleanLockIssues,
 } from "./utils/clean";
+import {
+  categoryMayHaveRunningDeps,
+  categoryIdsForCleanPreflight,
+  findCloseableBlockingApps,
+  resolveCleanPreflight,
+} from "./utils/dependencies";
 
 function App() {
   const [phase, setPhase] = useState<AppPhase>("idle");
@@ -70,12 +77,27 @@ function App() {
   const [showSecureExitModal, setShowSecureExitModal] = useState(false);
   const [showQuickCleanModal, setShowQuickCleanModal] = useState(false);
   const [showDownloadsConfirmModal, setShowDownloadsConfirmModal] = useState(false);
+  const [cleanConfirmOpen, setCleanConfirmOpen] = useState(false);
+  const [cleanConfirmVariant, setCleanConfirmVariant] =
+    useState<CleanConfirmVariant>("final");
+  const [pendingDownloadExclusions, setPendingDownloadExclusions] = useState<string[]>(
+    [],
+  );
   const [diskSectionOpen, setDiskSectionOpen] = useState(false);
   const [privacySectionOpen, setPrivacySectionOpen] = useState(false);
   const [miscSectionOpen, setMiscSectionOpen] = useState(false);
   const [diskSort, setDiskSort] = useState<SectionSortMode>("size-desc");
   const [privacySort, setPrivacySort] = useState<SectionSortMode>("size-desc");
   const [dismissedBlockingPrompt, setDismissedBlockingPrompt] = useState(false);
+  const [dependencyPromptVariant, setDependencyPromptVariant] = useState<
+    "temp" | "dependency"
+  >("temp");
+  const [categoryRunningApps, setCategoryRunningApps] = useState<
+    Record<string, string[]>
+  >({});
+  const categoryProbeTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>(
+    {},
+  );
 
   const clearBlockingState = useCallback(() => {
     setShowBlockingModal(false);
@@ -84,6 +106,8 @@ function App() {
     setShowSecureExitModal(false);
     setShowQuickCleanModal(false);
     setShowDownloadsConfirmModal(false);
+    setCleanConfirmOpen(false);
+    setPendingDownloadExclusions([]);
     setBlockingApps([]);
     setInterferenceApps([]);
     setLoadingInterferenceApps(false);
@@ -92,6 +116,12 @@ function App() {
     setCheckingBlockers(false);
     setBlockingModalMode("clean");
     setDismissedBlockingPrompt(true);
+    setDependencyPromptVariant("temp");
+    setCategoryRunningApps({});
+    for (const timer of Object.values(categoryProbeTimers.current)) {
+      clearTimeout(timer);
+    }
+    categoryProbeTimers.current = {};
   }, []);
 
   const totalSize = useMemo(
@@ -101,6 +131,39 @@ function App() {
         .reduce((sum, c) => sum + c.size_bytes, 0),
     [categories, selected],
   );
+
+  const downloadsAlsoCleaningCategories = useMemo(
+    () =>
+      categories.filter(
+        (category) =>
+          selected.has(category.id) && category.id !== "downloads_folder",
+      ),
+    [categories, selected],
+  );
+
+  const pendingCleanCategories = useMemo(
+    () =>
+      categories.filter((category) => pendingCategoryIds.includes(category.id)),
+    [categories, pendingCategoryIds],
+  );
+
+  const openCleanConfirm = useCallback(
+    (
+      variant: CleanConfirmVariant,
+      categoryIds: string[],
+      excludedDownloadPaths: string[] = [],
+    ) => {
+      setPendingCategoryIds(categoryIds);
+      setPendingDownloadExclusions(excludedDownloadPaths);
+      setCleanConfirmVariant(variant);
+      setCleanConfirmOpen(true);
+    },
+    [],
+  );
+
+  const closeCleanConfirm = useCallback(() => {
+    setCleanConfirmOpen(false);
+  }, []);
 
 
   const sortedCategories = useMemo(
@@ -197,50 +260,103 @@ function App() {
     await runScan();
   }, [runScan]);
 
-  const fetchInterferenceApps = useCallback(async (categoryIds: string[]) => {
-    if (categoryIds.length === 0) {
-      setInterferenceApps([]);
-      return [];
-    }
+  const dependencyFetchers = useMemo(
+    () => ({
+      getLockingApps: (categoryIds: string[]) =>
+        invoke<LockingApp[]>("get_locking_apps", { categoryIds }),
+      getInterferenceApps: (categoryIds: string[]) =>
+        invoke<InterferenceApp[]>("get_interference_apps", { categoryIds }),
+    }),
+    [],
+  );
 
-    setLoadingInterferenceApps(true);
-    try {
-      const apps = await invoke<InterferenceApp[]>("get_interference_apps", {
-        categoryIds,
-      });
-      setInterferenceApps(apps);
-      return apps;
-    } catch {
-      setInterferenceApps([]);
-      return [];
-    } finally {
-      setLoadingInterferenceApps(false);
-    }
-  }, []);
+  const fetchInterferenceApps = useCallback(
+    async (categoryIds: string[]) => {
+      if (categoryIds.length === 0) {
+        setInterferenceApps([]);
+        return [];
+      }
+
+      setLoadingInterferenceApps(true);
+      try {
+        const apps = await dependencyFetchers.getInterferenceApps(categoryIds);
+        setInterferenceApps(apps);
+        return apps;
+      } catch {
+        setInterferenceApps([]);
+        return [];
+      } finally {
+        setLoadingInterferenceApps(false);
+      }
+    },
+    [dependencyFetchers],
+  );
 
   const findBlockingApps = useCallback(
     async (categoryIds: string[]): Promise<LockingApp[]> => {
       if (categoryIds.length === 0) return [];
-
-      let apps = await invoke<LockingApp[]>("get_locking_apps", { categoryIds });
-      if (apps.length === 0) {
-        apps = await invoke<LockingApp[]>("get_pre_scan_apps");
-      }
-      return filterCloseableLockingApps(apps);
+      return findCloseableBlockingApps(categoryIds, dependencyFetchers);
     },
-    [],
+    [dependencyFetchers],
   );
 
-  const runClean = useCallback(async (categoryIds: string[]) => {
-    setShowBlockingModal(false);
-    setShowTempPrompt(false);
-    setPhase("cleaning");
-    const snapshot = categories.filter((category) => categoryIds.includes(category.id));
-    setPreCleanCategories(snapshot);
-    try {
-      const result = await invoke<CleanResult>("clean_selected", {
-        categoryIds,
-      });
+  const probeCategoryRunning = useCallback(
+    (categoryId: string) => {
+      if (!categoryMayHaveRunningDeps(categoryId)) {
+        return;
+      }
+
+      const existing = categoryProbeTimers.current[categoryId];
+      if (existing) {
+        clearTimeout(existing);
+      }
+
+      categoryProbeTimers.current[categoryId] = setTimeout(() => {
+        delete categoryProbeTimers.current[categoryId];
+        void (async () => {
+          try {
+            const apps = await dependencyFetchers.getInterferenceApps([categoryId]);
+            if (apps.length === 0) {
+              setCategoryRunningApps((prev) => {
+                if (!(categoryId in prev)) return prev;
+                const next = { ...prev };
+                delete next[categoryId];
+                return next;
+              });
+              return;
+            }
+
+            const names = [
+              ...new Set(apps.map((app) => displayAppName(app.name))),
+            ];
+            setCategoryRunningApps((prev) => ({
+              ...prev,
+              [categoryId]: names,
+            }));
+          } catch {
+            // Ignore probe failures — yeet-time check still runs.
+          }
+        })();
+      }, 300);
+    },
+    [dependencyFetchers],
+  );
+
+  const runClean = useCallback(
+    async (categoryIds: string[], excludedDownloadPaths: string[] = []) => {
+      setShowBlockingModal(false);
+      setShowTempPrompt(false);
+      setPhase("cleaning");
+      const snapshot = categories.filter((category) =>
+        categoryIds.includes(category.id),
+      );
+      setPreCleanCategories(snapshot);
+      try {
+        const result = await invoke<CleanResult>("clean_selected", {
+          categoryIds,
+          excludedDownloadPaths:
+            excludedDownloadPaths.length > 0 ? excludedDownloadPaths : null,
+        });
       const refreshed = await invoke<ScanCategory[]>("scan_all");
       const enriched = enrichCleanResult(result, snapshot, refreshed);
       setCleanResult(enriched);
@@ -266,7 +382,51 @@ function App() {
       setCheckingBlockers(false);
       setClosingApps(false);
     }
-  }, [categories, setSortedCategories, dismissedBlockingPrompt, findBlockingApps]);
+  },
+    [categories, setSortedCategories, dismissedBlockingPrompt, findBlockingApps],
+  );
+
+  const proceedToClean = useCallback(
+    async (categoryIds: string[], excludedDownloadPaths: string[] = []) => {
+      setPendingCategoryIds(categoryIds);
+      setDismissedBlockingPrompt(false);
+      setCheckingBlockers(true);
+
+      const preflightIds = categoryIdsForCleanPreflight(categoryIds);
+
+      try {
+        const preflight = await resolveCleanPreflight(categoryIds, dependencyFetchers);
+
+        if (preflight.kind === "blocking") {
+          setBlockingApps(preflight.apps);
+          setBlockingModalMode("clean");
+          setShowBlockingModal(true);
+          return;
+        }
+
+        if (preflight.kind === "advisory") {
+          setInterferenceApps(preflight.apps);
+          setDependencyPromptVariant(
+            preflightIds.includes("user_temp") ? "temp" : "dependency",
+          );
+          setShowTempPrompt(true);
+          return;
+        }
+      } catch {
+        if (preflightIds.includes("user_temp")) {
+          await fetchInterferenceApps(preflightIds);
+          setDependencyPromptVariant("temp");
+          setShowTempPrompt(true);
+          return;
+        }
+      } finally {
+        setCheckingBlockers(false);
+      }
+
+      await openCleanConfirm("final", categoryIds, excludedDownloadPaths);
+    },
+    [dependencyFetchers, fetchInterferenceApps, openCleanConfirm],
+  );
 
   const openBlockingAppsModal = useCallback(
     async (categoryIds: string[]): Promise<LockingApp[]> => {
@@ -282,22 +442,14 @@ function App() {
           setBlockingModalMode("clean");
           setShowBlockingModal(true);
         } else {
-          const interference = await fetchInterferenceApps(categoryIds);
-          const closeable = closeableInterferenceApps(interference);
-          if (closeable.length > 0) {
-            setBlockingApps(closeable);
-            setBlockingModalMode("clean");
-            setShowBlockingModal(true);
-          } else {
-            setShowNoAppsFound(true);
-          }
+          setShowNoAppsFound(true);
         }
         return apps;
       } finally {
         setCheckingBlockers(false);
       }
     },
-    [findBlockingApps, fetchInterferenceApps],
+    [findBlockingApps],
   );
 
   const handleFindBlockingApps = useCallback(async () => {
@@ -314,48 +466,13 @@ function App() {
     if (selected.size === 0 || checkingBlockers) return;
 
     const categoryIds = Array.from(selected);
-    if (categoryIds.includes("downloads_folder") && !showDownloadsConfirmModal) {
+    if (categoryIds.includes("downloads_folder")) {
       setShowDownloadsConfirmModal(true);
       return;
     }
-    setShowDownloadsConfirmModal(false);
-    setPendingCategoryIds(categoryIds);
-    setDismissedBlockingPrompt(false);
-    setCheckingBlockers(true);
 
-    try {
-      const apps = await findBlockingApps(categoryIds);
-      if (apps.length > 0) {
-        setBlockingApps(apps);
-        setBlockingModalMode("clean");
-        setShowBlockingModal(true);
-        return;
-      }
-
-      if (categoryIds.includes("user_temp")) {
-        await fetchInterferenceApps(categoryIds);
-        setShowTempPrompt(true);
-        return;
-      }
-    } catch {
-      if (categoryIds.includes("user_temp")) {
-        await fetchInterferenceApps(categoryIds);
-        setShowTempPrompt(true);
-        return;
-      }
-    } finally {
-      setCheckingBlockers(false);
-    }
-
-    await runClean(categoryIds);
-  }, [
-    selected,
-    runClean,
-    checkingBlockers,
-    findBlockingApps,
-    fetchInterferenceApps,
-    showDownloadsConfirmModal,
-  ]);
+    openCleanConfirm("start", categoryIds);
+  }, [selected, checkingBlockers, openCleanConfirm]);
 
   const closeSelectedApps = useCallback(async (appsToClose: LockingApp[]) => {
     if (appsToClose.length === 0) return;
@@ -387,10 +504,36 @@ function App() {
       if (categoryIds.length === 0) return;
 
       await closeSelectedApps(appsToClose);
-      await runClean(categoryIds);
+      openCleanConfirm("final", categoryIds, pendingDownloadExclusions);
     },
-    [pendingCategoryIds, selected, runClean, closeSelectedApps],
+    [pendingCategoryIds, selected, openCleanConfirm, closeSelectedApps, pendingDownloadExclusions],
   );
+
+  const handleCleanConfirm = useCallback(() => {
+    const categoryIds =
+      pendingCategoryIds.length > 0 ? pendingCategoryIds : Array.from(selected);
+    if (categoryIds.length === 0) {
+      closeCleanConfirm();
+      return;
+    }
+
+    if (cleanConfirmVariant === "start") {
+      closeCleanConfirm();
+      void proceedToClean(categoryIds, pendingDownloadExclusions);
+      return;
+    }
+
+    closeCleanConfirm();
+    void runClean(categoryIds, pendingDownloadExclusions);
+  }, [
+    pendingCategoryIds,
+    selected,
+    cleanConfirmVariant,
+    closeCleanConfirm,
+    proceedToClean,
+    pendingDownloadExclusions,
+    runClean,
+  ]);
 
   const handleForceCloseAndScan = useCallback(
     async (appsToClose: LockingApp[]) => {
@@ -411,15 +554,28 @@ function App() {
     [blockingModalMode, handleForceCloseAndScan, handleForceCloseAndClean],
   );
 
-  const toggleCategory = useCallback((id: string) => {
-    setPhase((current) => (current === "done" ? "results" : current));
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  const toggleCategory = useCallback(
+    (id: string) => {
+      setPhase((current) => (current === "done" ? "results" : current));
+      setSelected((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) {
+          next.delete(id);
+          setCategoryRunningApps((running) => {
+            if (!(id in running)) return running;
+            const updated = { ...running };
+            delete updated[id];
+            return updated;
+          });
+        } else {
+          next.add(id);
+          probeCategoryRunning(id);
+        }
+        return next;
+      });
+    },
+    [probeCategoryRunning],
+  );
 
   const handleSecureExitConfirm = useCallback(
     (selectedIds: Set<string>) => {
@@ -504,7 +660,8 @@ function App() {
     !showNoAppsFound &&
     !showSecureExitModal &&
     !showQuickCleanModal &&
-    !showDownloadsConfirmModal;
+    !showDownloadsConfirmModal &&
+    !cleanConfirmOpen;
   const showResults =
     phase === "scanning" ||
     phase === "results" ||
@@ -577,13 +734,22 @@ function App() {
           open={showTempPrompt}
           apps={interferenceApps}
           loadingApps={loadingInterferenceApps}
+          variant={dependencyPromptVariant}
           onCancel={clearBlockingState}
           onFindApps={() => {
+            const closeable = closeableInterferenceApps(interferenceApps);
+            if (closeable.length > 0) {
+              setBlockingApps(closeable);
+              setBlockingModalMode("clean");
+              setShowTempPrompt(false);
+              setShowBlockingModal(true);
+              return;
+            }
             void openBlockingAppsModal(pendingCategoryIds);
           }}
           onYeetAnyway={() => {
             setShowTempPrompt(false);
-            void runClean(pendingCategoryIds);
+            openCleanConfirm("final", pendingCategoryIds, pendingDownloadExclusions);
           }}
         />
 
@@ -594,7 +760,7 @@ function App() {
           onCancel={clearBlockingState}
           onYeetAnyway={() => {
             setShowNoAppsFound(false);
-            void runClean(pendingCategoryIds);
+            openCleanConfirm("final", pendingCategoryIds, pendingDownloadExclusions);
           }}
         />
 
@@ -612,12 +778,24 @@ function App() {
           onCancel={() => setShowQuickCleanModal(false)}
           onConfirm={handleQuickCleanConfirm}
         />
+        <CleanConfirmModal
+          open={cleanConfirmOpen}
+          variant={cleanConfirmVariant}
+          categories={pendingCleanCategories}
+          excludedDownloadPaths={pendingDownloadExclusions}
+          onCancel={closeCleanConfirm}
+          onConfirm={handleCleanConfirm}
+        />
+
         <DownloadsConfirmModal
           open={showDownloadsConfirmModal}
           category={categories.find((item) => item.id === "downloads_folder") ?? null}
+          alsoCleaningCategories={downloadsAlsoCleaningCategories}
           onCancel={() => setShowDownloadsConfirmModal(false)}
-          onConfirm={() => {
-            void handleClean();
+          onConfirm={(excludedPaths) => {
+            setPendingDownloadExclusions(excludedPaths);
+            setShowDownloadsConfirmModal(false);
+            void proceedToClean(Array.from(selected), excludedPaths);
           }}
         />
 
@@ -766,9 +944,8 @@ function App() {
                                 <SectionSelectionBar
                                   accent="cyan"
                                   {...sectionSelectionCounts(selected, diskCategories)}
-                                  allSelected={sectionAllSelected(selected, diskCategories)}
                                   onToggle={() =>
-                                    sectionAllSelected(selected, diskCategories)
+                                    sectionAnySelected(selected, diskCategories)
                                       ? deselectSection(diskCategories)
                                       : selectSection(diskCategories)
                                   }
@@ -791,6 +968,7 @@ function App() {
                               onToggle={toggleCategory}
                               index={i}
                               selectable={isCategorySelectable(cat)}
+                              runningApps={categoryRunningApps[cat.id]}
                             />
                           ))}
                         </CollapsibleScanSection>
@@ -831,12 +1009,8 @@ function App() {
                                   <SectionSelectionBar
                                     accent="purple"
                                     {...sectionSelectionCounts(selected, privacyCategories)}
-                                    allSelected={sectionAllSelected(
-                                      selected,
-                                      privacyCategories,
-                                    )}
                                     onToggle={() =>
-                                      sectionAllSelected(selected, privacyCategories)
+                                      sectionAnySelected(selected, privacyCategories)
                                         ? deselectSection(privacyCategories)
                                         : selectSection(privacyCategories)
                                     }
@@ -860,6 +1034,7 @@ function App() {
                               onToggle={toggleCategory}
                               index={i}
                               selectable={isCategorySelectable(cat)}
+                              runningApps={categoryRunningApps[cat.id]}
                             />
                           ))}
                         </CollapsibleScanSection>
@@ -882,9 +1057,8 @@ function App() {
                                 <SectionSelectionBar
                                   accent="amber"
                                   {...sectionSelectionCounts(selected, miscCategories)}
-                                  allSelected={sectionAllSelected(selected, miscCategories)}
                                   onToggle={() =>
-                                    sectionAllSelected(selected, miscCategories)
+                                    sectionAnySelected(selected, miscCategories)
                                       ? deselectSection(miscCategories)
                                       : selectSection(miscCategories)
                                   }
@@ -901,6 +1075,7 @@ function App() {
                               onToggle={toggleCategory}
                               index={i}
                               selectable={isCategorySelectable(cat)}
+                              runningApps={categoryRunningApps[cat.id]}
                             />
                           ))}
                         </CollapsibleScanSection>

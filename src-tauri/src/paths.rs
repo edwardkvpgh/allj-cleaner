@@ -219,26 +219,71 @@ pub fn is_browser_privacy_category(category_id: &str) -> bool {
     )
 }
 
-pub fn category_needs_browser_check(category_id: &str) -> bool {
-    matches!(
-        category_id,
-        "chrome_cache"
-            | "edge_cache"
-            | "firefox_cache"
-            | "brave_cache"
-            | "chrome_cookies"
-            | "chrome_history"
-            | "chrome_site_storage"
-            | "edge_cookies"
-            | "edge_history"
-            | "edge_site_storage"
-            | "brave_cookies"
-            | "brave_history"
-            | "brave_site_storage"
-            | "firefox_cookies"
-            | "firefox_history"
-            | "firefox_site_storage"
-    )
+/// Windows process names (`ProcessName`, without `.exe`) that should be running-checked
+/// before cleaning this category. User temp uses a separate broad probe in `process_manager`.
+pub fn category_dependency_process_names(category_id: &str) -> &'static [&'static str] {
+    match category_id {
+        "chrome_cache" | "chrome_cookies" | "chrome_history" | "chrome_site_storage" => {
+            &["chrome"]
+        }
+        "edge_cache" | "edge_cookies" | "edge_history" | "edge_site_storage" => &["msedge"],
+        "firefox_cache" | "firefox_cookies" | "firefox_history" | "firefox_site_storage" => {
+            &["firefox"]
+        }
+        "brave_cache" | "brave_cookies" | "brave_history" | "brave_site_storage" => &["brave"],
+        "teams_cache" => &["ms-teams", "Teams"],
+        "discord_cache" => &["Discord"],
+        "spotify_cache" => &["Spotify"],
+        _ => &[],
+    }
+}
+
+pub fn selection_uses_broad_temp_probe(category_ids: &[String]) -> bool {
+    category_ids.iter().any(|id| id == "user_temp")
+}
+
+pub fn dependency_process_names_for_categories(category_ids: &[String]) -> Vec<String> {
+    use std::collections::HashSet;
+
+    let mut names = Vec::new();
+    let mut seen = HashSet::new();
+
+    for id in category_ids {
+        for name in category_dependency_process_names(id) {
+            let key = name.to_lowercase();
+            if seen.insert(key) {
+                names.push((*name).to_string());
+            }
+        }
+    }
+
+    names
+}
+
+#[cfg(test)]
+mod dependency_tests {
+    use super::*;
+
+    #[test]
+    fn browser_cache_maps_to_single_browser() {
+        assert_eq!(category_dependency_process_names("brave_cache"), &["brave"]);
+        assert_eq!(category_dependency_process_names("chrome_cache"), &["chrome"]);
+        assert!(category_dependency_process_names("recycle_bin").is_empty());
+    }
+
+    #[test]
+    fn teams_cache_includes_legacy_process_name() {
+        let names = category_dependency_process_names("teams_cache");
+        assert!(names.contains(&"Teams"));
+        assert!(names.contains(&"ms-teams"));
+    }
+
+    #[test]
+    fn merged_deps_deduplicate_across_categories() {
+        let ids = vec!["brave_cache".into(), "brave_cookies".into()];
+        let merged = dependency_process_names_for_categories(&ids);
+        assert_eq!(merged, vec!["brave"]);
+    }
 }
 
 pub fn browser_privacy_installed(category_id: &str) -> bool {

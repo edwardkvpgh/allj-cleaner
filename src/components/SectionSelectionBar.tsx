@@ -3,7 +3,6 @@ import { SelectionToggle } from "./SelectionToggle";
 interface SectionSelectionBarProps {
   selectedCount: number;
   totalCount: number;
-  allSelected: boolean;
   onToggle: () => void;
   disabled?: boolean;
   accent?: "cyan" | "pink" | "purple" | "amber";
@@ -12,7 +11,6 @@ interface SectionSelectionBarProps {
 export function SectionSelectionBar({
   selectedCount,
   totalCount,
-  allSelected,
   onToggle,
   disabled = false,
   accent = "cyan",
@@ -28,7 +26,7 @@ export function SectionSelectionBar({
       </p>
       <SelectionToggle
         accent={accent}
-        allSelected={allSelected}
+        anySelected={selectedCount > 0}
         onToggle={onToggle}
         disabled={disabled}
       />

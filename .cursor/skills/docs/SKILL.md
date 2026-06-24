@@ -45,7 +45,7 @@ All documentation lives in the [`docs/`](./docs/) folder. Index maintained per [
 | [TECH-STACK.md](../../docs/TECH-STACK.md) | 📖 Reference | Tauri, React, Rust stack — modules, tooling, build |
 | [SECURITY-PRIVACY-ROADMAP.md](../../docs/SECURITY-PRIVACY-ROADMAP.md) | ✅ Shipped (v0.2) | Privacy & sessions, Secure exit, DNS, Misc, Phase 5 AppData discovery |
 | [PERFORMANCE-TOOL-ROADMAP.md](../../docs/PERFORMANCE-TOOL-ROADMAP.md) | 🔲 Future | PI (Performance) menu — startup, background apps, outdated apps/drivers |
-| [FUTURE-TODO-LIST.md](../../docs/FUTURE-TODO-LIST.md) | 🔲 Planned | Downloads picker (v0.2.x); unified bookmark, password, and extension managers (Chrome, Edge, Brave, Firefox) — phases §1–§2 |
+| [FUTURE-TODO-LIST.md](../../docs/FUTURE-TODO-LIST.md) | 🔲 Planned | Downloads picker (v0.2.x); **shipped** per-category dependency detection (§2); unified bookmark, password, and extension managers (post v0.3+) |
 | [GITHUB-FIRST-PUSH.md](../../docs/GITHUB-FIRST-PUSH.md) | 📖 Reference | Repo owner: first git init and initial push to GitHub |
 | [GITHUB-TEAM-ONBOARDING.md](../../docs/GITHUB-TEAM-ONBOARDING.md) | 📖 Reference | New teammate: clone, setup, pull, branch, commit, first push |
 | [LICENSE.md](../../LICENSE.md) | 📖 Reference | MIT License |
@@ -54,7 +54,7 @@ All documentation lives in the [`docs/`](./docs/) folder. Index maintained per [
 
 Use this **Contents** cell unless the doc scope changes:
 
-> Planned features: **Downloads picker** (Misc — list/select/delete, v0.2.x) and unified **bookmark**, **password**, and **extension** managers for Chrome, Edge, Brave, and Firefox (post v0.3+)
+> Planned: **Downloads picker** (Misc — list/select/delete, v0.2.x). Shipped: **per-category dependency detection**. Future: unified **bookmark**, **password**, and **extension** managers (post v0.3+)
 
 **Status:** `🔲 Planned`
 
@@ -86,4 +86,5 @@ Change Status in the doc header and README row to `✅ Shipped`. Move detailed i
 |------|-------------|
 | Update doc index | *“Update README Project docs per /docs skill.”* |
 | Downloads picker | *“Implement FUTURE-TODO-LIST §1 — Downloads picker.”* |
-| Future browser managers | *“Implement FUTURE-TODO-LIST §2 Phase A — unified bookmark manager.”* |
+| Category dependencies | *Shipped — see FUTURE-TODO-LIST §2.* |
+| Future browser managers | *“Implement FUTURE-TODO-LIST §3 Phase A — unified bookmark manager.”* |

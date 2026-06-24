@@ -22,7 +22,7 @@ pub fn scan_paths(paths: &[PathBuf]) -> ScanStats {
     total
 }
 
-fn scan_single(path: &Path) -> ScanStats {
+pub fn scan_single(path: &Path) -> ScanStats {
     let mut stats = ScanStats::default();
 
     if path.is_file() {

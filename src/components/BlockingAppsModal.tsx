@@ -39,7 +39,6 @@ export function BlockingAppsModal({
   }
 
   const selectedApps = apps.filter((app) => selectedPids.has(app.pid));
-  const allSelected = selectedApps.length === apps.length;
   const isScanMode = mode === "scan";
 
   const toggleApp = (pid: number) => {
@@ -52,7 +51,7 @@ export function BlockingAppsModal({
   };
 
   const toggleAll = () => {
-    setSelectedPids(allSelected ? new Set() : new Set(apps.map((app) => app.pid)));
+    setSelectedPids(selectedApps.length > 0 ? new Set() : new Set(apps.map((app) => app.pid)));
   };
 
   return createPortal(
@@ -86,7 +85,6 @@ export function BlockingAppsModal({
           <SectionSelectionBar
             selectedCount={selectedApps.length}
             totalCount={apps.length}
-            allSelected={allSelected}
             onToggle={toggleAll}
             disabled={busy}
           />

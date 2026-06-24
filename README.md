@@ -108,8 +108,9 @@ Detail: [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) · Privacy: [SECURITY-
 | File | When |
 |------|------|
 | **`start.bat`** | First time only — installs Node, Rust, npm packages |
-| **`run.bat`** | Daily use — double-click this instead |
+| **`run.bat`** | Daily use — builds release if needed, then launches standalone app |
 | **`build.bat`** | Once — builds a real `.exe` you can pin to desktop |
+| **`clean.bat`** | Optional — free GBs from `src-tauri\target`. **K** keeps the **release** `allj-cleaner.exe` + `resources\` (needs `build.bat` once first); **F** deletes everything |
 
 ## `run.bat` vs `build.bat`
 
@@ -118,9 +119,9 @@ Detail: [INITIAL-PROPOSAL.md](./docs/INITIAL-PROPOSAL.md) · Privacy: [SECURITY-
 
 ### `run.bat` — daily launcher
 
-- Starts EDdys Cleaner so you can use it
-- If you already built the app, it opens the `.exe` directly (fast)
-- If not, it runs **dev mode** (`npm run tauri dev`) — may compile first, needs Node/Rust in the background
+- Builds a **release** standalone app if none exists yet (first run takes a few minutes)
+- Rebuilds when code changed or the release bundle is incomplete
+- Then opens `allj-cleaner.exe` directly (no localhost / dev server)
 - Use this **every time** you want to open the app
 
 ### `build.bat` — one-time packager
@@ -273,7 +274,7 @@ Windows often locks temp files while apps are running. If you see **partially ye
 - Partial clean / skipped file reporting
 - Detect blocking apps → confirm → force close
 - Delete locked files on next reboot
-- `start.bat` / `run.bat` / `build.bat` launchers
+- `start.bat` / `run.bat` / `build.bat` / `clean.bat` launchers
 
 ### v0.2 (current)
 
@@ -285,6 +286,8 @@ Everything in v0.1, plus:
 - **Privacy & sessions** — cookies, history & downloads list, site storage (Chrome, Edge, Brave, Firefox)
 - **Secure exit** preset, **Quick clean**, **Misc** (Downloads folder + DNS flush)
 - Disk / Privacy / Misc sections, opt-in privacy & misc by default
+- **Per-category dependency detection** — Teams/Brave/etc. probed only when that category is selected; running-app badge on select; scoped yeet preflight (no generic pre-scan fallback on clean)
+- **Downloads exclude** — confirm modal lists top-level folders/files (A–Z); check items to keep; delete the rest
 
 ---
 
@@ -298,7 +301,7 @@ All documentation lives in the [`docs/`](./docs/) folder. This index is maintain
 | [TECH-STACK.md](./docs/TECH-STACK.md) | Full tech stack (Tauri, React, Rust, tooling) and purpose of each component | 📖 Reference |
 | [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md) | Privacy & sessions, Secure exit, DNS, Misc, Phase 5 AppData discovery — implementation guide | ✅ Shipped (v0.2) |
 | [PERFORMANCE-TOOL-ROADMAP.md](./docs/PERFORMANCE-TOOL-ROADMAP.md) | PI (Performance) menu — startup apps, background apps, outdated apps/drivers | 🔲 Future |
-| [FUTURE-TODO-LIST.md](./docs/FUTURE-TODO-LIST.md) | Planned features: **Downloads picker** (Misc — list/select/delete, v0.2.x); unified bookmark, password, and extension managers (post v0.3+) | 🔲 Planned |
+| [FUTURE-TODO-LIST.md](./docs/FUTURE-TODO-LIST.md) | Planned: **Downloads picker** (v0.2.x); shipped: **per-category dependency detection**; unified bookmark, password, and extension managers (post v0.3+) | 🔲 Planned |
 | [GITHUB-FIRST-PUSH.md](./docs/GITHUB-FIRST-PUSH.md) | Repo owner: first-time git init and initial push to GitHub | 📖 Reference |
 | [GITHUB-TEAM-ONBOARDING.md](./docs/GITHUB-TEAM-ONBOARDING.md) | New teammate: clone, dev setup, pull, branch, commit, first push | 📖 Reference |
 | [LICENSE.md](./LICENSE.md) | MIT License — free to use, modify, and distribute | 📖 Reference |

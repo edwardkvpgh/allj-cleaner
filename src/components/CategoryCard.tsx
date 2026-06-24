@@ -10,6 +10,7 @@ interface CategoryCardProps {
   onToggle: (id: string) => void;
   index: number;
   selectable?: boolean;
+  runningApps?: string[];
 }
 
 export const CategoryCard = memo(function CategoryCard({
@@ -18,6 +19,7 @@ export const CategoryCard = memo(function CategoryCard({
   onToggle,
   index,
   selectable,
+  runningApps,
 }: CategoryCardProps) {
   const disabled =
     selectable !== undefined
@@ -90,6 +92,11 @@ export const CategoryCard = memo(function CategoryCard({
             {!category.available && (
               <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-xs text-white/30">
                 not found
+              </span>
+            )}
+            {selected && runningApps && runningApps.length > 0 && (
+              <span className="rounded-full bg-amber-400/15 px-2.5 py-0.5 text-xs font-medium text-amber-300">
+                {runningApps.join(", ")} running
               </span>
             )}
           </div>

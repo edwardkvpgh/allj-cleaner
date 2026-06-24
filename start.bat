@@ -149,6 +149,7 @@ echo  Next time, just double-click:  run.bat
 echo  ^(much faster - skips install steps^)
 echo.
 echo  To rebuild the .exe later:      build.bat
+echo  To free disk space ^(cargo clean^): clean.bat
 echo.
 echo [BUILD] Building EDdys Cleaner...
 echo         First compile may take 2-5 minutes. Hang tight.

@@ -102,6 +102,22 @@ export function filterCloseableLockingApps(apps: LockingApp[]): LockingApp[] {
   return apps.filter((app) => !isProtectedAppName(app.name));
 }
 
+export function mergeLockingApps(...lists: LockingApp[][]): LockingApp[] {
+  const byPid = new Map<number, LockingApp>();
+
+  for (const list of lists) {
+    for (const app of list) {
+      if (!byPid.has(app.pid)) {
+        byPid.set(app.pid, app);
+      }
+    }
+  }
+
+  return [...byPid.values()].sort((a, b) =>
+    displayAppName(a.name).localeCompare(displayAppName(b.name)),
+  );
+}
+
 export function displayAppName(name: string): string {
   return APP_DISPLAY_NAMES[name.toLowerCase()] ?? name;
 }

@@ -11,7 +11,25 @@ interface TempCleanPromptProps {
   onCancel: () => void;
   onYeetAnyway: () => void;
   onFindApps: () => void;
+  variant?: "temp" | "dependency";
 }
+
+const PROMPT_COPY = {
+  temp: {
+    title: "temp files might be locked",
+    subtitle:
+      "these background processes can hold temp files open. close them first for a cleaner yeet.",
+    emptyMessage:
+      "No known interference apps detected. Windows services may still lock some files — yeet anyway removes what is free.",
+  },
+  dependency: {
+    title: "related apps still running",
+    subtitle:
+      "these apps can block a full clean for your selected categories. close them first for best results.",
+    emptyMessage:
+      "No related apps detected right now. Yeet anyway still removes unlocked files.",
+  },
+} as const;
 
 export function TempCleanPrompt({
   open,
@@ -20,12 +38,14 @@ export function TempCleanPrompt({
   onCancel,
   onYeetAnyway,
   onFindApps,
+  variant = "temp",
 }: TempCleanPromptProps) {
   if (typeof document === "undefined" || !open) {
     return null;
   }
 
   const hasCloseable = apps.some((app) => app.closeable);
+  const copy = PROMPT_COPY[variant];
 
   return createPortal(
     <div
@@ -42,18 +62,16 @@ export function TempCleanPrompt({
           </div>
           <div>
             <h3 className="font-display text-lg font-semibold text-white">
-              temp files might be locked
+              {copy.title}
             </h3>
-            <p className="mt-1 text-sm text-white/50">
-              these background processes can hold temp files open. close them first for a cleaner yeet.
-            </p>
+            <p className="mt-1 text-sm text-white/50">{copy.subtitle}</p>
           </div>
         </div>
 
         <InterferenceAppList
           apps={apps}
           loading={loadingApps}
-          emptyMessage="No known interference apps detected. Windows services may still lock some files — yeet anyway removes what is free."
+          emptyMessage={copy.emptyMessage}
         />
 
         <p className="mb-4 text-xs text-white/40">

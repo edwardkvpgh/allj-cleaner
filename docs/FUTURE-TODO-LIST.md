@@ -13,18 +13,19 @@ Planned features not yet in the app. Shipped work lives in [SECURITY-PRIVACY-ROA
 
 | # | Feature | Target | Priority | Section |
 |---|---------|--------|----------|---------|
-| 1 | **Downloads picker** — list files/folders, select what to remove | v0.2.x | **P0** | [§1](#1-downloads-picker-misc) |
-| 2 | **Unified bookmark manager** (4 browsers) | Post v0.3+ | P1 | [§2](#2-unified-browser-managers) |
-| 3 | **Unified extension list** (read-only) | Post v0.3+ | P2 | [§2](#2-unified-browser-managers) |
-| 4 | **Unified password manager** | Post v0.3+ | P3 | [§2](#2-unified-browser-managers) |
+| 1 | **Downloads picker / exclude** — list top-level items; delete all except kept | v0.2.x | ✅ Shipped (exclude) | [§1](#1-downloads-picker-misc) |
+| 2 | **Per-category dependency detection** — scoped running-app checks | v0.2.x | ✅ Shipped | [§2](#2-per-category-dependency-detection-shipped) |
+| 3 | **Unified bookmark manager** (4 browsers) | Post v0.3+ | P1 | [§3](#3-unified-browser-managers) |
+| 4 | **Unified extension list** (read-only) | Post v0.3+ | P2 | [§3](#3-unified-browser-managers) |
+| 5 | **Unified password manager** | Post v0.3+ | P3 | [§3](#3-unified-browser-managers) |
 
 ---
 
 ## 1. Downloads picker (Misc)
 
-**Status:** 🔲 Planned — not implemented  
+**Status:** ✅ Exclude mode shipped (v0.2.x) · 🔲 Include-only picker deferred  
 **Target:** v0.2.x (Misc → Downloads folder)  
-**Context:** Today, confirming **Downloads folder** attempts to remove **all** files and folders inside `%USERPROFILE%\Downloads` (see [SECURITY-PRIVACY-ROADMAP.md](./SECURITY-PRIVACY-ROADMAP.md) Phase 4). Users want a **modal listing** top-level items with **checkboxes** — delete only what they select. Keeps **Browse in Explorer**; never in Secure exit.
+**Context:** Confirm modal supports **exclude** — default delete all top-level items; user can expand **exclude files / folders**, check items to **keep** (folders A–Z, then files A–Z). **Yes, clean downloads** removes everything else. Include-only picker (select what to delete, default nothing) remains optional future UX.
 
 ### Goal
 
@@ -116,7 +117,45 @@ Scan → user checks Misc → Downloads folder → Yeet
 
 ---
 
-## 2. Unified browser managers
+## 2. Per-category dependency detection (shipped)
+
+**Status:** ✅ Shipped (v0.2.x)  
+**Context:** Before yeet, each category now probes **only its related processes** (e.g. Teams Cache → `Teams` / `ms-teams`, Brave Cache → `brave`). User temp keeps the broad interference list. Closeable apps → blocking modal; protected-only → advisory modal.
+
+### Dependency map
+
+| Category IDs | Processes probed |
+|--------------|------------------|
+| `chrome_cache`, `chrome_*` privacy | `chrome` |
+| `edge_cache`, `edge_*` privacy | `msedge` (+ `msedgewebview2` advisory) |
+| `firefox_cache`, `firefox_*` privacy | `firefox` |
+| `brave_cache`, `brave_*` privacy | `brave` |
+| `teams_cache` | `Teams`, `ms-teams` |
+| `discord_cache` | `Discord` |
+| `spotify_cache` | `Spotify` |
+| `user_temp` | Broad temp interference list (unchanged) |
+| Recycle Bin, Clipboard, DNS, Thumbnail, Downloads | None |
+
+### UX
+
+| Trigger | Behavior |
+|---------|----------|
+| **Select category** | Debounced badge: “Brave running” when applicable |
+| **Yeet** | Scoped preflight → close modal, advisory modal, or proceed |
+| **Scan** | Generic pre-scan unchanged (scan accuracy) |
+
+### Files
+
+| Layer | Path |
+|-------|------|
+| Dependency map | `src-tauri/src/paths.rs` — `category_dependency_process_names` |
+| Probes | `src-tauri/src/process_manager.rs` |
+| Preflight | `src/utils/dependencies.ts` |
+| UI | `App.tsx`, `CategoryCard.tsx`, `TempCleanPrompt.tsx` |
+
+---
+
+## 3. Unified browser managers
 
 **Status:** 🔲 Planned — not implemented  
 **Target:** Post v0.3+ (Advanced browser data — separate from disk clean & privacy yeet)

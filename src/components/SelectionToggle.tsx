@@ -1,12 +1,12 @@
 interface SelectionToggleProps {
-  allSelected: boolean;
+  anySelected: boolean;
   onToggle: () => void;
   disabled?: boolean;
   accent?: "cyan" | "pink" | "purple" | "amber";
 }
 
 export function SelectionToggle({
-  allSelected,
+  anySelected,
   onToggle,
   disabled = false,
   accent = "cyan",
@@ -27,7 +27,7 @@ export function SelectionToggle({
       disabled={disabled}
       className={`shrink-0 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${accentClass}`}
     >
-      {allSelected ? "deselect all" : "select all"}
+      {anySelected ? "deselect all" : "select all"}
     </button>
   );
 }

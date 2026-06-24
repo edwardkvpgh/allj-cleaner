@@ -3,7 +3,7 @@ use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
 
-const DETECT_TIMEOUT: Duration = Duration::from_secs(3);
+const DETECT_TIMEOUT: Duration = Duration::from_secs(8);
 const INTERFERENCE_TIMEOUT: Duration = Duration::from_secs(8);
 
 #[cfg(windows)]
@@ -31,34 +31,32 @@ mod windows_impl {
 
     pub fn find_locking_apps(paths: &[PathBuf], category_ids: &[String]) -> Vec<LockingApp> {
         let existing: Vec<PathBuf> = paths.iter().filter(|p| p.exists()).cloned().collect();
-        if existing.is_empty() {
-            return vec![];
-        }
-
-        let needs_browser_check = category_ids
-            .iter()
-            .any(|id| crate::paths::category_needs_browser_check(id))
-            || category_ids.iter().any(|id| id == "user_temp");
-        let needs_temp_check = category_ids.iter().any(|id| id == "user_temp");
+        let broad_temp = crate::paths::selection_uses_broad_temp_probe(category_ids);
+        let scoped_deps = if broad_temp {
+            Vec::new()
+        } else {
+            crate::paths::dependency_process_names_for_categories(category_ids)
+        };
 
         let mut apps = Vec::new();
 
-        let existing_paths = existing.clone();
-        if let Ok(Ok(rm_apps)) =
-            run_with_timeout(move || find_with_restart_manager(&existing_paths))
-        {
-            apps.extend(rm_apps);
-        }
-
-        if needs_browser_check {
-            if let Ok(browser_apps) = run_with_timeout(find_browser_apps) {
-                apps.extend(browser_apps);
+        if !existing.is_empty() {
+            let existing_paths = existing.clone();
+            if let Ok(Ok(rm_apps)) =
+                run_with_timeout(move || find_with_restart_manager(&existing_paths))
+            {
+                apps.extend(rm_apps);
             }
         }
 
-        if needs_temp_check {
+        if broad_temp {
             if let Ok(bg_apps) = run_with_timeout(find_temp_blocking_apps) {
                 apps.extend(bg_apps);
+            }
+        } else if !scoped_deps.is_empty() {
+            let deps = scoped_deps;
+            if let Ok(dep_apps) = run_with_timeout(move || find_processes_by_names(&deps, true)) {
+                apps.extend(dep_apps);
             }
         }
 
@@ -67,23 +65,28 @@ mod windows_impl {
 
     pub fn find_interference_apps(paths: &[PathBuf], category_ids: &[String]) -> Vec<InterferenceApp> {
         let existing: Vec<PathBuf> = paths.iter().filter(|p| p.exists()).cloned().collect();
-
-        let needs_browser_check = category_ids
-            .iter()
-            .any(|id| crate::paths::category_needs_browser_check(id))
-            || category_ids.iter().any(|id| id == "user_temp");
-        let needs_temp_check = category_ids.iter().any(|id| id == "user_temp");
+        let broad_temp = crate::paths::selection_uses_broad_temp_probe(category_ids);
+        let scoped_deps = if broad_temp {
+            Vec::new()
+        } else {
+            let mut deps = crate::paths::dependency_process_names_for_categories(category_ids);
+            append_supplementary_interference_names(&mut deps);
+            deps
+        };
 
         let mut apps = Vec::new();
         let mut locking_pids = HashSet::new();
 
-        if needs_temp_check && !existing.is_empty() {
+        if !existing.is_empty() {
             let existing_paths = existing.clone();
-            if let Ok(Ok(rm_apps)) =
-                run_with_timeout_ms(INTERFERENCE_TIMEOUT, move || {
-                    find_with_restart_manager(&existing_paths)
-                })
-            {
+            let timeout = if broad_temp {
+                INTERFERENCE_TIMEOUT
+            } else {
+                DETECT_TIMEOUT
+            };
+            if let Ok(Ok(rm_apps)) = run_with_timeout_ms(timeout, move || {
+                find_with_restart_manager(&existing_paths)
+            }) {
                 for app in &rm_apps {
                     locking_pids.insert(app.pid);
                     for pid in &app.pids {
@@ -94,19 +97,86 @@ mod windows_impl {
             }
         }
 
-        if needs_browser_check {
-            if let Ok(browser_apps) = run_with_timeout(find_browser_apps_all) {
-                apps.extend(browser_apps);
-            }
-        }
-
-        if needs_temp_check {
+        if broad_temp {
             if let Ok(bg_apps) = run_with_timeout(find_interference_candidates) {
                 apps.extend(bg_apps);
+            }
+        } else if !scoped_deps.is_empty() {
+            let deps = scoped_deps;
+            if let Ok(dep_apps) = run_with_timeout(move || find_processes_by_names(&deps, false)) {
+                apps.extend(dep_apps);
             }
         }
 
         to_interference_apps(apps, &locking_pids)
+    }
+
+    fn append_supplementary_interference_names(deps: &mut Vec<String>) {
+        let has_edge = deps.iter().any(|name| name.eq_ignore_ascii_case("msedge"));
+        if has_edge
+            && !deps
+                .iter()
+                .any(|name| name.eq_ignore_ascii_case("msedgewebview2"))
+        {
+            deps.push("msedgewebview2".to_string());
+        }
+
+        let has_teams = deps.iter().any(|name| {
+            let lower = name.to_lowercase();
+            lower == "teams" || lower == "ms-teams" || lower == "msteams"
+        });
+        if has_teams
+            && !deps
+                .iter()
+                .any(|name| name.eq_ignore_ascii_case("msedgewebview2"))
+        {
+            deps.push("msedgewebview2".to_string());
+        }
+    }
+
+    fn find_processes_by_names(names: &[String], filter_protected: bool) -> Vec<LockingApp> {
+        if names.is_empty() {
+            return vec![];
+        }
+
+        let quoted: Vec<String> = names
+            .iter()
+            .map(|name| format!("'{}'", name.replace('\'', "''")))
+            .collect();
+        let script = format!(
+            "Get-Process -Name @({}) -ErrorAction SilentlyContinue | Select-Object Id, ProcessName -Unique | ConvertTo-Json -Compress",
+            quoted.join(",")
+        );
+
+        let mut apps = if filter_protected {
+            run_process_query(&script)
+        } else {
+            run_process_query_all(&script)
+        };
+
+        if apps.is_empty() {
+            if let Some(pattern_script) = dependency_pattern_script(names) {
+                apps = if filter_protected {
+                    run_process_query(pattern_script)
+                } else {
+                    run_process_query_all(pattern_script)
+                };
+            }
+        }
+
+        apps
+    }
+
+    fn dependency_pattern_script(names: &[String]) -> Option<&'static str> {
+        let normalized: Vec<String> = names.iter().map(|n| n.to_lowercase()).collect();
+
+        if normalized.iter().any(|name| name.contains("team")) {
+            return Some(
+                r#"Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -match '^(?i)(ms-teams|msteams|teams)$' } | Select-Object Id, ProcessName -Unique | ConvertTo-Json -Compress"#,
+            );
+        }
+
+        None
     }
 
     pub fn find_cleanup_interference_apps() -> Vec<LockingApp> {
@@ -337,14 +407,6 @@ mod windows_impl {
         )
     }
 
-    fn find_browser_apps_all() -> Vec<LockingApp> {
-        run_process_query_all(
-            r#"Get-Process chrome,msedge,firefox,brave,msedgewebview2 -ErrorAction SilentlyContinue |
-                Select-Object Id, ProcessName -Unique |
-                ConvertTo-Json -Compress"#,
-        )
-    }
-
     fn find_temp_blocking_apps() -> Vec<LockingApp> {
         run_process_query(
             r#"Get-Process | Where-Object {
@@ -388,16 +450,14 @@ mod windows_impl {
             .output()
             .ok()?;
 
-        if !output.status.success() {
+        let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if text.is_empty() {
             return None;
         }
 
-        let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if text.is_empty() {
-            None
-        } else {
-            Some(text)
-        }
+        // Get-Process -Name @('Teams','ms-teams') exits non-zero when any name is missing,
+        // but stdout still contains JSON for processes that were found (e.g. ms-teams only).
+        Some(text)
     }
 
     fn parse_process_json(json: &str, filter_protected: bool) -> Vec<LockingApp> {

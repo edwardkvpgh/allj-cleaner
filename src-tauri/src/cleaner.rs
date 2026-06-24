@@ -15,7 +15,10 @@ use walkdir::WalkDir;
 const DELETE_RETRIES: u32 = 3;
 const RETRY_DELAY_MS: u64 = 80;
 
-pub fn clean_categories(category_ids: &[String]) -> CleanResult {
+pub fn clean_categories(
+    category_ids: &[String],
+    excluded_download_paths: &[String],
+) -> CleanResult {
     let mut result = CleanResult {
         freed_bytes: 0,
         files_removed: 0,
@@ -60,6 +63,13 @@ pub fn clean_categories(category_ids: &[String]) -> CleanResult {
             continue;
         }
 
+        if id == "downloads_folder" {
+            let mut downloads_result =
+                crate::downloads::clean_downloads_excluding(excluded_download_paths);
+            merge_clean_result(&mut result, &mut downloads_result);
+            continue;
+        }
+
         let paths = resolve_category_paths(id);
         if paths.is_empty() {
             continue;
@@ -100,6 +110,19 @@ pub fn clean_categories(category_ids: &[String]) -> CleanResult {
     result
 }
 
+fn merge_clean_result(target: &mut CleanResult, source: &mut CleanResult) {
+    target.freed_bytes += source.freed_bytes;
+    target.files_removed += source.files_removed;
+    target.files_skipped_locked += source.files_skipped_locked;
+    target.files_scheduled_reboot += source.files_scheduled_reboot;
+    target.categories_cleaned.append(&mut source.categories_cleaned);
+    for error in source.errors.drain(..) {
+        if target.errors.len() < 5 {
+            target.errors.push(error);
+        }
+    }
+}
+
 fn clean_paths(paths: &[PathBuf], allowed_roots: &[PathBuf], result: &mut CleanResult) {
     for path in paths {
         if !path.exists() {
@@ -123,6 +146,10 @@ fn clean_paths(paths: &[PathBuf], allowed_roots: &[PathBuf], result: &mut CleanR
             clean_entry(&entry, allowed_roots, result);
         }
     }
+}
+
+pub fn clean_download_entry(entry: &Path, allowed_roots: &[PathBuf], result: &mut CleanResult) {
+    clean_entry(entry, allowed_roots, result);
 }
 
 fn clean_entry(entry: &Path, allowed_roots: &[PathBuf], result: &mut CleanResult) {

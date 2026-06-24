@@ -40,9 +40,6 @@ export function QuickCleanModal({
   const selectedCount = categories.filter((category) =>
     selectedIds.has(category.id),
   ).length;
-  const allSelected =
-    selectableCategories.length > 0 &&
-    selectableCategories.every((category) => selectedIds.has(category.id));
 
   const toggleCategory = (id: string) => {
     setSelectedIds((prev) => {
@@ -55,7 +52,9 @@ export function QuickCleanModal({
 
   const toggleAll = () => {
     setSelectedIds(
-      allSelected ? new Set() : new Set(selectableCategories.map((c) => c.id)),
+      selectedCount > 0
+        ? new Set()
+        : new Set(selectableCategories.map((c) => c.id)),
     );
   };
 
@@ -95,7 +94,6 @@ export function QuickCleanModal({
                 accent="cyan"
                 selectedCount={selectedCount}
                 totalCount={categories.length}
-                allSelected={allSelected}
                 onToggle={toggleAll}
                 disabled={selectableCategories.length === 0}
               />

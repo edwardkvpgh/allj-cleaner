@@ -1,5 +1,6 @@
 mod cleaner;
 mod clipboard;
+mod downloads;
 mod models;
 mod paths;
 mod process_manager;
@@ -10,7 +11,7 @@ mod scanner;
 mod single_instance;
 mod system_clean;
 
-use models::{CleanResult, CloseAppsResult, InterferenceApp, LockingApp, ScanCategory};
+use models::{CleanResult, CloseAppsResult, DownloadEntry, InterferenceApp, LockingApp, ScanCategory};
 use paths::{resolve_category_paths, CATEGORIES};
 use scanner::scan_paths;
 
@@ -82,8 +83,19 @@ fn scan_all() -> Vec<ScanCategory> {
 }
 
 #[tauri::command]
-fn clean_selected(category_ids: Vec<String>) -> CleanResult {
-    cleaner::clean_categories(&category_ids)
+fn clean_selected(
+    category_ids: Vec<String>,
+    excluded_download_paths: Option<Vec<String>>,
+) -> CleanResult {
+    cleaner::clean_categories(
+        &category_ids,
+        excluded_download_paths.as_deref().unwrap_or(&[]),
+    )
+}
+
+#[tauri::command]
+fn list_downloads_entries() -> Result<Vec<DownloadEntry>, String> {
+    downloads::list_downloads_entries()
 }
 
 #[tauri::command]
@@ -149,6 +161,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             scan_all,
             clean_selected,
+            list_downloads_entries,
             get_pre_scan_apps,
             get_interference_apps,
             get_locking_apps,

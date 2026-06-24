@@ -99,7 +99,7 @@ Loaded in `index.html`; mapped in `tailwind.config.js` as `font-display` and `fo
 | `scanner.rs` | Walk paths and aggregate `size_bytes` + `file_count` |
 | `cleaner.rs` | Delete selected categories, partial-clean reporting, special actions (DNS) |
 | `safety.rs` | Denylist / path guards so cleaning never targets system-critical locations |
-| `process_manager.rs` | Detect locking apps (browsers, Teams, etc.), Restart Manager, optional force-close |
+| `process_manager.rs` | Per-category dependency probes, Restart Manager file locks, optional force-close |
 | `recycle_bin.rs` | Empty Recycle Bin via Windows Shell API |
 | `clipboard.rs` | Clear clipboard / Win+V history where possible |
 | `system_clean.rs` | DNS flush via `ipconfig /flushdns` (no admin for standard user cache) |
