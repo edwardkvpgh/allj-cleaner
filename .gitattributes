@@ -1,0 +1,26 @@
+# Normalize line endings across Windows, macOS, and Linux.
+# Git stores LF in the repo; your OS checks out files appropriately.
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF to run correctly.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts stay LF.
+*.sh text eol=lf
+
+# Rust / Tauri
+*.rs text eol=lf
+*.toml text eol=lf
+Cargo.lock text eol=lf
+
+# Web / config
+*.{js,jsx,ts,tsx,mjs,cjs} text eol=lf
+*.{json,html,css,md,yml,yaml} text eol=lf
+*.{ps1,psm1} text eol=lf
+
+# SVG is text; images and archives are binary.
+*.svg text eol=lf
+*.{png,jpg,jpeg,gif,webp,ico,icns} binary
+*.{woff,woff2,ttf,eot} binary
+*.{zip,gz,7z,rar,exe,dll,so,dylib} binary
