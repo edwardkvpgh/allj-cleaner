@@ -29,7 +29,7 @@ export function WindowTitleBar() {
   }, []);
 
   return (
-    <div className="relative z-20 h-10 w-full shrink-0 overflow-hidden border-b border-neon-purple/40 bg-gradient-to-r from-[#1f1238]/90 via-[#141525] to-[#0f1a2e]/90 shadow-[0_1px_0_rgba(168,85,247,0.35),0_8px_32px_rgba(168,85,247,0.12)]">
+    <div className="titlebar-shell relative z-20 h-10 w-full shrink-0 overflow-hidden">
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="titlebar-orb left-[30%] top-1/2 h-10 w-52 -translate-x-1/2 -translate-y-1/2 animate-pulse_slow bg-neon-purple/35" />
         <div
@@ -58,7 +58,7 @@ export function WindowTitleBar() {
           </div>
           <span
             data-tauri-drag-region
-            className="titlebar-drag truncate font-display text-xs font-semibold tracking-wide text-white/90"
+            className="titlebar-drag truncate font-display text-xs font-semibold tracking-wide text-fg/90"
           >
             {APP_NAME}
           </span>
@@ -69,7 +69,7 @@ export function WindowTitleBar() {
             type="button"
             aria-label="Minimize window"
             onClick={minimize}
-            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-fg/55 transition-colors hover:bg-fg/10 hover:text-fg"
           >
             <Minus size={14} strokeWidth={2.5} />
           </button>
@@ -77,7 +77,7 @@ export function WindowTitleBar() {
             type="button"
             aria-label="Maximize window"
             onClick={toggleMaximize}
-            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/55 transition-colors hover:bg-white/10 hover:text-white"
+            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-fg/55 transition-colors hover:bg-fg/10 hover:text-fg"
           >
             <Square size={12} strokeWidth={2.5} />
           </button>
@@ -85,7 +85,7 @@ export function WindowTitleBar() {
             type="button"
             aria-label="Close window"
             onClick={close}
-            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-white/70 transition-colors hover:bg-neon-pink hover:text-white hover:shadow-[inset_0_0_16px_rgba(255,45,149,0.35)]"
+            className="titlebar-no-drag flex h-10 w-11 items-center justify-center text-fg/70 transition-colors hover:bg-neon-pink hover:text-fg hover:shadow-[inset_0_0_16px_rgba(255,45,149,0.35)]"
           >
             <X size={15} strokeWidth={2.5} />
           </button>

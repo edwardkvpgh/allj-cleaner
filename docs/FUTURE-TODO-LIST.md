@@ -2,7 +2,7 @@
 
 **Created:** 2026-06-23  
 **Last updated:** 2026-06-23  
-**Product:** EDdys Cleaner (EDdys Inc)  
+**Product:** Detox (AJThink Labs)  
 **Status:** Planned items — not implemented (see each section)
 
 Planned features not yet in the app. Shipped work lives in [SECURITY-PRIVACY-ROADMAP.md](./SECURITY-PRIVACY-ROADMAP.md) and README version history.
@@ -160,7 +160,7 @@ Scan → user checks Misc → Downloads folder → Yeet
 **Status:** 🔲 Planned — not implemented  
 **Target:** Post v0.3+ (Advanced browser data — separate from disk clean & privacy yeet)
 
-**Context:** Users may want **one place** to review saved passwords, bookmarks, and extensions across **Chrome, Edge, Brave, and Firefox** — and delete items **one at a time**. Today EDdys Cleaner **does not** touch passwords, bookmarks, or extensions (`safety.rs` denylist; see [SECURITY-PRIVACY-ROADMAP.md](./SECURITY-PRIVACY-ROADMAP.md)).
+**Context:** Users may want **one place** to review saved passwords, bookmarks, and extensions across **Chrome, Edge, Brave, and Firefox** — and delete items **one at a time**. Today Detox **does not** touch passwords, bookmarks, or extensions (`safety.rs` denylist; see [SECURITY-PRIVACY-ROADMAP.md](./SECURITY-PRIVACY-ROADMAP.md)).
 
 ### Goal
 
@@ -325,7 +325,7 @@ One UI, **multiple backends**:
 | Scope | Verdict |
 |-------|---------|
 | **Unified extension list (read-only)** | Reasonable future feature |
-| **Disable/uninstall from EDdys** | **Poor fit** — use browser extension pages |
+| **Disable/uninstall from Detox** | **Poor fit** — use browser extension pages |
 | **Extension cache clean** | Could stay under **Disk junk** as optional category later |
 
 ### Effort (rough)
@@ -340,7 +340,7 @@ One UI, **multiple backends**:
 
 ## Comparison summary
 
-| Manager | Unified UI? | Same backend? | Feasible? | Fit for EDdys? | Priority |
+| Manager | Unified UI? | Same backend? | Feasible? | Fit for Detox? | Priority |
 |---------|-------------|---------------|-----------|----------------|----------|
 | **Bookmarks** | Yes | No (JSON + SQLite) | ✅ Moderate | Good (advanced) | **P1** |
 | **Passwords** | Yes | No (DPAPI + NSS) | ⚠️ Hard | Risky | **P3** |

@@ -1,6 +1,6 @@
-# EDdys Cleaner — Tech Stack
+# Detox — Tech Stack
 
-**Product:** EDdys Cleaner (ALLJ-Cleaner)  
+**Product:** Detox (AJThink Labs)  
 **Platform:** Windows 10 / 11 desktop  
 **Architecture:** Tauri 2 hybrid app — React UI + Rust system engine
 
@@ -127,7 +127,7 @@ Loaded in `index.html`; mapped in `tailwind.config.js` as `font-display` and `fo
 | **npm** | Dependency management (`package.json`, `package-lock.json`) |
 | **Cargo** | Rust dependency management and compilation (`Cargo.toml`, `Cargo.lock`) |
 | **Visual Studio C++ Build Tools** | Required on Windows to compile Rust/Tauri native code (first-time setup) |
-| **NSIS** (via Tauri bundle) | Produces `EDdys Cleaner_*_x64-setup.exe` Windows installer |
+| **NSIS** (via Tauri bundle) | Produces `Detox_*_x64-setup.exe` Windows installer |
 | **WiX / MSI** (optional Tauri target) | Alternative Windows installer format when enabled |
 
 ### npm scripts

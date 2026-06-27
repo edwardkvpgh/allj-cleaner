@@ -100,13 +100,13 @@ export function InterferenceAppList({
 }: InterferenceAppListProps) {
   if (loading) {
     return (
-      <p className="mb-4 text-xs text-white/40">scanning running processes...</p>
+      <p className="text-caption mb-4">scanning running processes...</p>
     );
   }
 
   if (apps.length === 0) {
     return (
-      <p className="mb-4 text-xs leading-relaxed text-white/45">{emptyMessage}</p>
+      <p className="text-caption mb-4">{emptyMessage}</p>
     );
   }
 
@@ -114,7 +114,7 @@ export function InterferenceAppList({
 
   return (
     <div className="mb-4">
-      <p className="mb-2 text-xs text-white/40">
+      <p className="text-caption mb-2">
         {apps.length} background {apps.length === 1 ? "app" : "apps"} detected
         {closeableCount > 0
           ? ` · ${closeableCount} can be closed automatically`
@@ -126,20 +126,20 @@ export function InterferenceAppList({
           return (
             <li
               key={`${app.name}-${app.pid}`}
-              className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5"
+              className="panel-inset px-3 py-2.5"
             >
               <div className="mb-1 flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-white">
+                <span className="text-sm font-medium text-fg">
                   {displayAppName(app.name)}
                 </span>
                 {processLabel && (
-                  <span className="text-xs text-white/35">{processLabel}</span>
+                  <span className="text-caption">{processLabel}</span>
                 )}
                 <span
                   className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
                     app.closeable
                       ? "bg-neon-cyan/15 text-neon-cyan"
-                      : "bg-amber-400/15 text-amber-300"
+                      : "bg-warn-bg/15 text-warn"
                   }`}
                 >
                   {app.closeable ? "closeable" : "protected"}
@@ -150,7 +150,7 @@ export function InterferenceAppList({
                   </span>
                 )}
               </div>
-              <p className="text-xs leading-relaxed text-white/45">{getAppAdvice(app)}</p>
+              <p className="text-caption">{getAppAdvice(app)}</p>
             </li>
           );
         })}

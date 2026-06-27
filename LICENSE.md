@@ -1,8 +1,8 @@
 MIT License
 
-Copyright (c) 2026 EDdys Inc
+Copyright (c) 2026 AJThink Labs
 
-EDdys Cleaner is free software published by EDdys Inc.
+Detox is free software published by AJThink Labs.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -31,10 +31,10 @@ interface CollapsibleScanSectionProps {
 export function CollapsibleScanSection({
   title,
   subtitle,
-  titleClassName = "text-white/30",
+  titleClassName = "text-fg-muted",
   sizeSummary,
-  sizeAccentClassName = "text-white/55",
-  subtitleClassName = "text-white/35",
+  sizeAccentClassName = "text-fg-muted",
+  subtitleClassName = "text-fg-muted/90",
   accent = "cyan",
   className = "",
   open,
@@ -46,10 +46,10 @@ export function CollapsibleScanSection({
     accent === "pink"
       ? "border-neon-pink/50 bg-neon-pink/15 text-neon-pink"
       : accent === "purple"
-        ? "border-neon-purple/50 bg-neon-purple/15 text-neon-purple"
+        ? "border-section-purple/45 bg-section-purple/12 text-section-purple"
         : accent === "amber"
-          ? "border-amber-300/50 bg-amber-300/15 text-amber-300"
-          : "border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan";
+          ? "border-section-amber/45 bg-section-amber/12 text-section-amber"
+          : "border-section-cyan/40 bg-section-cyan/10 text-section-cyan";
 
   return (
     <section className={`space-y-3 ${className}`.trim()}>
@@ -64,7 +64,7 @@ export function CollapsibleScanSection({
             className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
               open
                 ? toggleOpenClass
-                : "border-white/20 bg-white/5 text-white/50 group-hover:border-white/30"
+                : "border-fg/20 bg-fg/5 text-fg-subtle group-hover:border-fg/30 group-hover:text-fg-muted"
             }`}
           >
             {open ? <Minus size={12} strokeWidth={2.5} /> : <Plus size={12} strokeWidth={2.5} />}
@@ -81,11 +81,11 @@ export function CollapsibleScanSection({
                   className={`text-xs tabular-nums normal-case tracking-tight ${sizeAccentClassName}`}
                   aria-label={`${formatBytesCompact(sizeSummary.selectedBytes)} selected of ${formatBytesCompact(sizeSummary.totalBytes)} total in ${title}`}
                 >
-                  <span className="text-white/45">( </span>
+                  <span className="text-fg-subtle">( </span>
                   <CompactSizeAmount bytes={sizeSummary.selectedBytes} />
-                  <span className="px-0.5 text-white/70">/</span>
+                  <span className="px-0.5 text-fg-muted">/</span>
                   <CompactSizeAmount bytes={sizeSummary.totalBytes} />
-                  <span className="text-white/45"> )</span>
+                  <span className="text-fg-subtle"> )</span>
                 </span>
               )}
             </span>

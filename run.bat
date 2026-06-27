@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
-title EDdys Cleaner
+title Detox
 cd /d "%~dp0"
 
 set "CARGO_BIN=%USERPROFILE%\.cargo\bin"
@@ -10,7 +10,7 @@ set "PATH=%CARGO_BIN%;%PATH%"
 tasklist /FI "IMAGENAME eq allj-cleaner.exe" 2>nul | find /I "allj-cleaner.exe" >nul
 if %errorlevel% equ 0 (
     echo.
-    echo EDdys Cleaner is already running.
+    echo Detox is already running.
     choice /C YN /M "Close the other window and start a fresh one"
     if errorlevel 2 exit /b 0
     taskkill /F /IM allj-cleaner.exe >nul 2>&1
@@ -23,7 +23,7 @@ set "RELEASE_RESOURCES=src-tauri\target\release\resources"
 where node >nul 2>&1
 if %errorlevel% neq 0 (
     if exist "%RELEASE_EXE%" if exist "%RELEASE_RESOURCES%" (
-        echo Starting EDdys Cleaner...
+        echo Starting Detox...
         start "" "%RELEASE_EXE%"
         exit /b 0
     )
@@ -86,13 +86,13 @@ if "!DO_BUILD!"=="1" (
         echo Incomplete release build ^(missing resources folder^).
         echo Rebuilding standalone app...
     ) else (
-        echo Code changed since last build - rebuilding EDdys Cleaner...
+        echo Code changed since last build - rebuilding Detox...
     )
     echo.
     call "%~dp0scripts\stop-running-app.bat"
     if !errorlevel! neq 0 (
         echo.
-        echo Close EDdys Cleaner manually, then run run.bat again.
+        echo Close Detox manually, then run run.bat again.
         pause
         exit /b 1
     )
@@ -121,6 +121,6 @@ if not exist "%RELEASE_RESOURCES%" (
     exit /b 1
 )
 
-echo Starting EDdys Cleaner...
+echo Starting Detox...
 start "" "%RELEASE_EXE%"
 exit /b 0

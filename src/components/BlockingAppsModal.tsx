@@ -56,7 +56,7 @@ export function BlockingAppsModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-overlay/75 p-4 backdrop-blur-sm"
       onClick={() => {
         if (!busy) onCancel();
       }}
@@ -70,10 +70,10 @@ export function BlockingAppsModal({
             <AlertTriangle className="text-neon-pink" size={20} />
           </div>
           <div>
-            <h3 className="font-display text-lg font-semibold text-white">
+            <h3 className="font-display text-lg font-semibold text-fg">
               {isScanMode ? "apps still running" : "apps blocking cleanup"}
             </h3>
-            <p className="mt-1 text-sm text-white/50">
+            <p className="text-body-secondary mt-1">
               {isScanMode
                 ? "browsers and other apps can skew your scan. close them first for best results."
                 : "pick which apps to close, then yeet again."}
@@ -103,7 +103,7 @@ export function BlockingAppsModal({
                   className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-sm transition-colors ${
                     checked
                       ? "border-neon-pink/40 bg-neon-pink/10"
-                      : "border-white/10 bg-white/[0.03] hover:border-white/20"
+                      : "border-fg/10 bg-fg/[0.03] hover:border-fg/20"
                   }`}
                 >
                   <span className="flex min-w-0 items-center gap-2">
@@ -111,17 +111,17 @@ export function BlockingAppsModal({
                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
                         checked
                           ? "border-neon-pink bg-neon-pink text-void"
-                          : "border-white/20 bg-transparent"
+                          : "border-fg/20 bg-transparent"
                       }`}
                     >
                       {checked && <Check size={12} strokeWidth={3} />}
                     </span>
                     <span className="min-w-0 text-left">
-                      <span className="block font-medium text-white">
+                      <span className="block font-medium text-fg">
                         {displayAppName(app.name)}
                       </span>
                       {processLabel && (
-                        <span className="block text-xs text-white/40">{processLabel}</span>
+                        <span className="text-caption block">{processLabel}</span>
                       )}
                     </span>
                   </span>
@@ -131,7 +131,7 @@ export function BlockingAppsModal({
           })}
         </ul>
 
-        <p className="mb-4 text-xs text-amber-400/80">
+        <p className="notice-warn mb-4">
           unsaved work in closed apps will be lost. File Explorer, shell, search, and other system apps are never closed.
         </p>
 
@@ -140,7 +140,7 @@ export function BlockingAppsModal({
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-white/60 transition-colors hover:border-white/20 hover:text-white disabled:opacity-40"
+            className="btn-secondary"
           >
             {isScanMode ? "I'll close manually" : "cancel"}
           </button>
@@ -158,7 +158,7 @@ export function BlockingAppsModal({
             type="button"
             onClick={() => onConfirm(selectedApps)}
             disabled={busy || selectedApps.length === 0}
-            className="rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-4 py-2.5 font-display text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-gradient-to-r from-neon-pink to-neon-purple px-4 py-2.5 font-display text-sm font-semibold text-on-accent disabled:opacity-50"
           >
             {busy
               ? "closing..."

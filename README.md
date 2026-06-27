@@ -1,4 +1,4 @@
-# EDdys Cleaner
+# Detox
 
 Disk detox for the chronically online. Scan and clean temp files, browser caches, and your Recycle Bin — with a full preview before anything gets yeeted.
 
@@ -8,7 +8,7 @@ Disk detox for the chronically online. Scan and clean temp files, browser caches
 
 ## What it does
 
-EDdys Cleaner is a standalone desktop app that finds junk on your PC, shows you exactly what can be removed, and cleans only what you pick.
+Detox is a standalone desktop app that finds junk on your PC, shows you exactly what can be removed, and cleans only what you pick.
 
 | Category | What it cleans |
 |----------|----------------|
@@ -33,7 +33,7 @@ EDdys Cleaner is a standalone desktop app that finds junk on your PC, shows you 
 
 **Also includes:** blocking-app detection with confirmation before force close, partial-clean reporting, and delete-on-restart for locked files.
 
-Privacy and misc categories are **not** auto-selected on scan — pick them manually when needed. See [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md).
+All categories (Disk junk, Privacy & sessions, Misc) start **unselected** after scan — pick what you want to clean. See [SECURITY-PRIVACY-ROADMAP.md](./docs/SECURITY-PRIVACY-ROADMAP.md).
 
 ---
 
@@ -228,7 +228,7 @@ Output: `src-tauri/target/release/bundle/`
 After `build.bat`, give users:
 
 ```
-src-tauri\target\release\bundle\nsis\EDdys Cleaner_0.1.0_x64-setup.exe
+src-tauri\target\release\bundle\nsis\Detox_0.1.0_x64-setup.exe
 ```
 
 **Option 2 — Portable single file**
@@ -310,4 +310,4 @@ All documentation lives in the [`docs/`](./docs/) folder. This index is maintain
 
 ## License
 
-EDdys Cleaner is **free** to use, modify, and distribute under the [MIT License](./LICENSE.md).
+Detox is **free** to use, modify, and distribute under the [MIT License](./LICENSE.md).

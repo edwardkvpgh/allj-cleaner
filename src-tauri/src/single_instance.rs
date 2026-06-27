@@ -60,9 +60,9 @@ mod windows_impl {
 
     fn prompt_close_existing() -> bool {
         let message = wide_string(
-            "EDdys Cleaner is already running.\n\nClose the other window and start a fresh one?",
+            "Detox is already running.\n\nClose the other window and start a fresh one?",
         );
-        let title = wide_string("EDdys Cleaner");
+        let title = wide_string("Detox");
 
         unsafe {
             MessageBoxW(
@@ -91,9 +91,9 @@ mod windows_impl {
 
     fn show_manual_close_message() {
         let message = wide_string(
-            "Could not close the other EDdys Cleaner window.\n\nClose it manually, then try again.",
+            "Could not close the other Detox window.\n\nClose it manually, then try again.",
         );
-        let title = wide_string("EDdys Cleaner");
+        let title = wide_string("Detox");
         unsafe {
             MessageBoxW(
                 std::ptr::null_mut(),

@@ -1,5 +1,5 @@
 @echo off
-title EDdys Cleaner - Build
+title Detox - Build
 cd /d "%~dp0"
 
 set "CARGO_BIN=%USERPROFILE%\.cargo\bin"
@@ -30,7 +30,7 @@ if exist "%ProgramFiles%\nodejs" set "PATH=%ProgramFiles%\nodejs;%PATH%"
 if exist "%LOCALAPPDATA%\Programs\nodejs" set "PATH=%LOCALAPPDATA%\Programs\nodejs;%PATH%"
 
 echo.
-echo Building EDdys Cleaner standalone app...
+echo Building Detox standalone app...
 echo This takes a few minutes the first time.
 echo.
 
@@ -45,7 +45,7 @@ call npm run tauri build
 
 if %errorlevel% neq 0 (
     echo.
-    echo Build failed. Close EDdys Cleaner if it is open, then try again.
+    echo Build failed. Close Detox if it is open, then try again.
     pause
     exit /b 1
 )

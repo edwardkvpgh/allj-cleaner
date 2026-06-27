@@ -2,7 +2,7 @@
 
 **Created:** 2026-06-22  
 **Last updated:** 2026-06-23 (Phase 5 — AppData discovery added)  
-**Product:** EDdys Cleaner (EDdys Inc)  
+**Product:** Detox (AJThink Labs)  
 **Target release:** v0.2 — Privacy & security cleanup  
 **Status:** Phase 1–4 implemented — Phase 5 (Final) planned  
 **Repo:** [edwardkvpgh/allj-cleaner](https://github.com/edwardkvpgh/allj-cleaner)
@@ -13,7 +13,7 @@
 
 ## Goal
 
-Add optional, user-controlled cleanup for **browser session & privacy data** — without turning EDdys Cleaner into a reckless “wipe everything” tool.
+Add optional, user-controlled cleanup for **browser session & privacy data** — without turning Detox into a reckless “wipe everything” tool.
 
 **Positioning:** Privacy hygiene for shared PCs and disk cleanup — **not** antivirus, **not** a full security suite, **not** a replacement for incognito mode or disk encryption.
 

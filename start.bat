@@ -1,12 +1,12 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-title EDdys Cleaner - Setup and Launch
+title Detox - Setup and Launch
 color 0B
 
 echo.
 echo  ============================================
-echo   EDdys Cleaner  -  disk detox launcher
+echo   Detox  -  disk detox launcher
 echo  ============================================
 echo.
 
@@ -138,7 +138,7 @@ if !errorlevel! equ 1 (
 )
 
 :: --------------------------------------------------
-:: 6. Build and launch EDdys Cleaner
+:: 6. Build and launch Detox
 :: --------------------------------------------------
 set "RELEASE_EXE=src-tauri\target\release\allj-cleaner.exe"
 
@@ -151,7 +151,7 @@ echo.
 echo  To rebuild the .exe later:      build.bat
 echo  To free disk space ^(cargo clean^): clean.bat
 echo.
-echo [BUILD] Building EDdys Cleaner...
+echo [BUILD] Building Detox...
 echo         First compile may take 2-5 minutes. Hang tight.
 echo.
 
@@ -166,7 +166,7 @@ if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Build failed.
     echo         Check errors above. Common fixes:
-    echo         - Close EDdys Cleaner if it is still open, then rerun start.bat
+    echo         - Close Detox if it is still open, then rerun start.bat
     echo         - Install Visual Studio C++ Build Tools
     echo         - Restart terminal after Rust install
     echo         - Run: rustup default stable
@@ -182,6 +182,6 @@ if not exist "%RELEASE_EXE%" (
     exit /b 1
 )
 
-echo [LAUNCH] Starting EDdys Cleaner...
+echo [LAUNCH] Starting Detox...
 start "" "%RELEASE_EXE%"
 exit /b 0

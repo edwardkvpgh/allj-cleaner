@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableDelayedExpansion
-title EDdys Cleaner - Free disk space
+title Detox - Free disk space
 color 0E
 
 cd /d "%~dp0"
@@ -12,7 +12,7 @@ set "RELEASE_EXE=src-tauri\target\release\allj-cleaner.exe"
 
 echo.
 echo  ============================================
-echo   EDdys Cleaner  -  free disk space
+echo   Detox  -  free disk space
 echo  ============================================
 echo.
 echo  Build cache folder:
@@ -98,7 +98,7 @@ if %errorlevel% neq 0 (
         echo [WARN] cargo not in PATH - removing target folder directly...
         rmdir /s /q "%TARGET_DIR%" 2>nul
         if exist "%TARGET_DIR%" (
-            echo [ERROR] Could not remove target. Close EDdys Cleaner and dev terminals.
+            echo [ERROR] Could not remove target. Close Detox and dev terminals.
             pause
             exit /b 1
         )
@@ -126,7 +126,7 @@ if !PRUNE_ERR! equ 1 (
 )
 if !PRUNE_ERR! neq 0 (
     echo.
-    echo [ERROR] Clean could not finish. Close EDdys Cleaner and try again.
+    echo [ERROR] Clean could not finish. Close Detox and try again.
     pause
     exit /b 1
 )

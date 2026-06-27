@@ -18,11 +18,11 @@ export function SectionSortButton({
 
   const activeClass =
     accent === "purple"
-      ? "border-neon-purple/50 bg-neon-purple/15 text-neon-purple"
-      : "border-neon-cyan/50 bg-neon-cyan/15 text-neon-cyan";
+      ? "border-section-purple/45 bg-section-purple/12 text-section-purple"
+      : "border-section-cyan/45 bg-section-cyan/12 text-section-cyan";
 
   const idleClass =
-    "border-white/15 bg-white/5 text-white/45 hover:border-white/25 hover:text-white/70";
+    "border-fg/15 bg-fg/5 text-fg-subtle hover:border-fg/25 hover:text-fg-muted";
 
   const buttonClass = (active: boolean) =>
     `flex flex-col items-center justify-center rounded-lg border px-1.5 py-0.5 transition-colors ${

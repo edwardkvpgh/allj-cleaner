@@ -20,12 +20,15 @@ import { QuickCleanModal } from "./components/QuickCleanModal";
 import { DownloadsConfirmModal } from "./components/DownloadsConfirmModal";
 import { CleanConfirmModal, type CleanConfirmVariant } from "./components/CleanConfirmModal";
 import { NoAppsFoundModal } from "./components/NoAppsFoundModal";
+import { AboutModal } from "./components/AboutModal";
+import { HeaderIconDock } from "./components/HeaderIconButton";
+import { ThemeModal } from "./components/ThemeModal";
 import { CollapsibleScanSection } from "./components/CollapsibleScanSection";
 import { SectionSelectionBar } from "./components/SectionSelectionBar";
 import { SectionSortButton } from "./components/SectionSortButton";
 import type { AppPhase, CleanResult, InterferenceApp, LockingApp, ScanCategory } from "./types";
 import { APP_NAME, COMPANY_NAME } from "./constants/brand";
-import { formatBytes } from "./utils/format";
+import { formatBytes, formatBytesParts } from "./utils/format";
 import {
   sortCategoriesBySize,
   sortCategoriesForSection,
@@ -77,6 +80,8 @@ function App() {
   const [showSecureExitModal, setShowSecureExitModal] = useState(false);
   const [showQuickCleanModal, setShowQuickCleanModal] = useState(false);
   const [showDownloadsConfirmModal, setShowDownloadsConfirmModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
   const [cleanConfirmOpen, setCleanConfirmOpen] = useState(false);
   const [cleanConfirmVariant, setCleanConfirmVariant] =
     useState<CleanConfirmVariant>("final");
@@ -677,48 +682,54 @@ function App() {
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         {/* Base corners */}
-        <div className="ambient-orb -left-20 top-20 h-64 w-64 animate-float bg-neon-purple/14" />
+        <div className="ambient-orb ambient-orb-fill-purple -left-20 top-20 h-64 w-64 animate-float" />
         <div
-          className="ambient-orb -right-16 bottom-32 h-56 w-56 animate-float bg-neon-cyan/14"
+          className="ambient-orb ambient-orb-fill-cyan -right-16 bottom-32 h-56 w-56 animate-float"
           style={{ animationDelay: "2s" }}
         />
 
         {/* 1 — upper center / quick-clean zone */}
         <div
-          className="ambient-orb left-[48%] top-[20%] h-52 w-80 -translate-x-1/2 animate-float bg-neon-pink/12"
+          className="ambient-orb ambient-orb-fill-pink left-[48%] top-[20%] h-52 w-80 -translate-x-1/2 animate-float"
           style={{ animationDelay: "0.8s" }}
         />
         <div
-          className="ambient-orb left-[58%] top-[28%] h-36 w-48 animate-float bg-neon-purple/10"
+          className="ambient-orb ambient-orb-fill-purple-soft left-[58%] top-[28%] h-36 w-48 animate-float"
           style={{ animationDelay: "1.6s" }}
         />
 
         {/* 2 — bottom-left footer status */}
         <div
-          className="ambient-orb bottom-20 left-[10%] h-44 w-60 animate-float bg-neon-cyan/12"
+          className="ambient-orb ambient-orb-fill-cyan bottom-20 left-[10%] h-44 w-60 animate-float"
           style={{ animationDelay: "2.4s" }}
         />
 
         {/* 3 — bottom center / action buttons */}
         <div
-          className="ambient-orb bottom-24 left-1/2 h-40 w-72 -translate-x-1/2 animate-float bg-neon-purple/14"
+          className="ambient-orb ambient-orb-fill-purple bottom-24 left-1/2 h-40 w-72 -translate-x-1/2 animate-float"
           style={{ animationDelay: "1.2s" }}
         />
         <div
-          className="ambient-orb bottom-28 left-[62%] h-32 w-52 animate-float bg-neon-pink/10"
+          className="ambient-orb ambient-orb-fill-pink-soft bottom-28 left-[62%] h-32 w-52 animate-float"
           style={{ animationDelay: "3s" }}
         />
 
         {/* 4 & 5 — right rail glow */}
-        <div className="ambient-orb -right-6 top-[38%] h-80 w-36 -translate-y-1/2 animate-pulse_slow bg-neon-cyan/12" />
+        <div className="ambient-orb ambient-orb-fill-cyan -right-6 top-[38%] h-80 w-36 -translate-y-1/2 animate-pulse_slow" />
         <div
-          className="ambient-orb right-[6%] top-[52%] h-64 w-28 -translate-y-1/2 animate-float bg-neon-purple/10"
+          className="ambient-orb ambient-orb-fill-purple-soft right-[6%] top-[52%] h-64 w-28 -translate-y-1/2 animate-float"
           style={{ animationDelay: "2.8s" }}
         />
       </div>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col p-6">
-        <Header />
+        <Header
+          onAboutClick={() => setShowAboutModal(true)}
+          onThemeClick={() => setShowThemeModal(true)}
+        />
+
+        <AboutModal open={showAboutModal} onClose={() => setShowAboutModal(false)} />
+        <ThemeModal open={showThemeModal} onClose={() => setShowThemeModal(false)} />
 
         <BlockingAppsModal
           apps={blockingApps}
@@ -820,7 +831,7 @@ function App() {
                   your disk is{" "}
                   <span className="text-gradient">lowkey bloated</span>
                 </h2>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-white/50 sm:text-base">
+                <p className="text-body-secondary mt-3 max-w-md sm:text-base">
                   scan for temp files, browser cache, and recycle bin junk.
                   preview everything. clean only what you pick. no cap.
                 </p>
@@ -828,7 +839,7 @@ function App() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={requestScan}
-                  className="mt-8 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon-purple to-neon-pink px-8 py-4 font-display text-base font-semibold shadow-glow transition-shadow hover:shadow-glow-cyan"
+                  className="mt-8 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon-purple to-neon-pink px-8 py-4 font-display text-base font-semibold text-on-accent shadow-glow transition-shadow hover:shadow-glow-cyan"
                 >
                   <ScanSearch size={20} />
                   scan my storage
@@ -858,16 +869,16 @@ function App() {
                         <p className={`font-display font-semibold ${banner.text}`}>
                           {banner.title}
                         </p>
-                        <p className="text-sm text-white/60">{banner.subtitle}</p>
+                        <p className="text-sm text-fg-muted">{banner.subtitle}</p>
                         {banner.tip && (
-                          <p className="mt-1.5 text-xs text-white/45">{banner.tip}</p>
+                          <p className="text-caption mt-1.5">{banner.tip}</p>
                         )}
                         {banner.showCloseApps && (
                           <button
                             type="button"
                             onClick={handleFindBlockingApps}
                             disabled={checkingBlockers}
-                            className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/15 px-4 py-2 text-sm font-medium text-amber-200 transition-colors hover:bg-amber-400/25 disabled:opacity-50"
+                            className="btn-warn mt-3 px-4 py-2 text-sm font-medium disabled:opacity-50"
                           >
                             {checkingBlockers
                               ? "finding apps..."
@@ -882,7 +893,7 @@ function App() {
 
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-widest text-neon-cyan/80">
+                    <p className="text-xs font-medium uppercase tracking-widest text-section-cyan/90">
                       {phase === "scanning"
                         ? "scanning..."
                         : phase === "cleaning"
@@ -891,18 +902,26 @@ function App() {
                     </p>
                     <p className="font-display text-2xl font-bold">
                       {phase === "scanning" ? (
-                        <span className="text-white/50">hold on...</span>
+                        <span className="text-fg-muted">hold on...</span>
                       ) : (
-                        <>
-                          <span className="text-gradient">
-                            {formatBytes(
-                              categories.reduce((s, c) => s + c.size_bytes, 0),
-                            )}
-                          </span>
-                          <span className="ml-2 text-base font-normal text-white/40">
-                            total
-                          </span>
-                        </>
+                        (() => {
+                          const totalBytes = categories.reduce(
+                            (s, c) => s + c.size_bytes,
+                            0,
+                          );
+                          const { value, unit } = formatBytesParts(totalBytes);
+                          return (
+                            <>
+                              <span className="junk-total-display inline-flex items-baseline gap-1.5">
+                                <span className="junk-total-value">{value}</span>
+                                <span className="junk-total-unit">{unit}</span>
+                              </span>
+                              <span className="ml-2 text-base font-normal text-fg-subtle">
+                                total
+                              </span>
+                            </>
+                          );
+                        })()
                       )}
                     </p>
                   </div>
@@ -910,7 +929,7 @@ function App() {
 
                 <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
                   {phase === "scanning" ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-white/40">
+                    <div className="flex flex-col items-center justify-center py-20 text-fg-muted">
                       <Loader2 className="mb-3 animate-spin text-neon-purple" size={32} />
                       <p className="text-sm">scanning your digital mess...</p>
                     </div>
@@ -919,10 +938,10 @@ function App() {
                       {diskCategories.length > 0 && (
                         <CollapsibleScanSection
                           title="disk junk"
-                          titleClassName="text-neon-cyan/85"
+                          titleClassName="text-section-cyan"
                           accent="cyan"
                           sizeSummary={sectionSizeTotals(selected, diskCategories)}
-                          sizeAccentClassName="text-neon-cyan/80"
+                          sizeAccentClassName="text-section-cyan/85"
                           open={diskSectionOpen}
                           onToggle={() => setDiskSectionOpen((open) => !open)}
                           headerAction={
@@ -936,7 +955,7 @@ function App() {
                                 <button
                                   type="button"
                                   onClick={handleQuickCleanSelect}
-                                  className="flex items-center gap-1.5 rounded-full border border-neon-cyan/35 bg-neon-cyan/10 px-3 py-1.5 text-xs font-medium text-neon-cyan transition-colors hover:bg-neon-cyan/20"
+                                  className="flex items-center gap-1.5 rounded-full border border-section-cyan/30 bg-section-cyan/10 px-3 py-1.5 text-xs font-medium text-section-cyan transition-colors hover:bg-section-cyan/18"
                                 >
                                   <Zap size={12} />
                                   quick clean
@@ -978,10 +997,11 @@ function App() {
                         <CollapsibleScanSection
                           title="privacy & sessions"
                           subtitle="not selected by default — signs you out of websites; passwords stay"
-                          titleClassName="text-neon-purple"
+                          titleClassName="text-section-purple"
                           accent="purple"
                           sizeSummary={sectionSizeTotals(selected, privacyCategories)}
-                          sizeAccentClassName="text-white/55"
+                          sizeAccentClassName="text-fg-muted"
+                          subtitleClassName="text-fg-muted/90"
                           className="pt-2"
                           open={privacySectionOpen}
                           onToggle={() => setPrivacySectionOpen((open) => !open)}
@@ -999,7 +1019,7 @@ function App() {
                                   <button
                                     type="button"
                                     onClick={() => setShowSecureExitModal(true)}
-                                    className="flex items-center gap-1.5 rounded-full border border-neon-purple/35 bg-neon-purple/10 px-3 py-1.5 text-xs font-medium text-neon-purple transition-colors hover:bg-neon-purple/20"
+                                    className="flex items-center gap-1.5 rounded-full border border-section-purple/30 bg-section-purple/10 px-3 py-1.5 text-xs font-medium text-section-purple transition-colors hover:bg-section-purple/18"
                                   >
                                     <LogOut size={12} />
                                     secure exit
@@ -1044,10 +1064,11 @@ function App() {
                         <CollapsibleScanSection
                           title="misc"
                           subtitle="not selected by default — downloads and DNS flush"
-                          titleClassName="text-amber-300/70"
+                          titleClassName="text-section-amber"
                           accent="amber"
                           sizeSummary={sectionSizeTotals(selected, miscCategories)}
-                          sizeAccentClassName="text-amber-300/80"
+                          sizeAccentClassName="text-section-amber/90"
+                          subtitleClassName="text-fg-muted/90"
                           className="pt-2"
                           open={miscSectionOpen}
                           onToggle={() => setMiscSectionOpen((open) => !open)}
@@ -1084,16 +1105,16 @@ function App() {
                   )}
                 </div>
 
-                <div className="mt-4 shrink-0 border-t border-white/10 bg-void/60 pt-4 backdrop-blur-md">
+                <div className="action-dock mt-4 shrink-0 border-t border-fg/10 bg-void/60 pt-4 backdrop-blur-md">
                   {showFooter && (
                     <div className="flex flex-wrap items-center gap-3">
                       {canAct && (
-                        <div className="min-w-0 flex-1 text-sm text-white/50">
+                        <div className="min-w-0 flex-1 text-sm text-fg-muted">
                           <Zap size={14} className="mr-1 inline text-neon-cyan" />
                           {selected.size > 0 ? (
                             <>
                               ready to free{" "}
-                              <span className="font-semibold text-white">
+                              <span className="font-semibold text-fg">
                                 {formatBytes(totalSize)}
                               </span>
                               {selectedIncludesPrivacy(selected) && (
@@ -1102,12 +1123,12 @@ function App() {
                                 </span>
                               )}
                               {selectedIncludesDns(selected) && (
-                                <span className="mt-1 block text-xs text-amber-300/80">
+                                <span className="mt-1 block text-xs text-section-amber/90">
                                   DNS cache will be flushed on yeet
                                 </span>
                               )}
                               {selectedIncludesDownloads(selected) && (
-                                <span className="mt-1 block text-xs text-amber-300/80">
+                                <span className="mt-1 block text-xs text-section-amber/90">
                                   downloads folder selected — confirmation required
                                 </span>
                               )}
@@ -1118,7 +1139,7 @@ function App() {
                               )}
                             </>
                           ) : (
-                            <span className="text-white/40">
+                            <span className="text-fg-subtle">
                               pick categories to clean
                             </span>
                           )}
@@ -1131,7 +1152,7 @@ function App() {
                           whileTap={{ scale: 0.98 }}
                           disabled={selected.size === 0 || checkingBlockers}
                           onClick={handleClean}
-                          className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple px-5 py-2.5 font-display text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+                          className="btn-yeet flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple px-5 py-2.5 font-display text-sm font-semibold text-on-accent disabled:cursor-not-allowed"
                         >
                           {checkingBlockers ? (
                             <Loader2 size={16} className="animate-spin" />
@@ -1147,7 +1168,7 @@ function App() {
                         whileTap={{ scale: 0.98 }}
                         onClick={requestScan}
                         disabled={checkingBlockers || phase === "cleaning"}
-                        className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-purple to-neon-pink px-5 py-2.5 font-display text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+                        className="btn-rescan flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-purple to-neon-pink px-5 py-2.5 font-display text-sm font-semibold text-on-accent transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <RotateCcw size={16} />
                         rescan
@@ -1158,7 +1179,7 @@ function App() {
                         whileTap={{ scale: 0.98 }}
                         onClick={reset}
                         disabled={phase === "cleaning"}
-                        className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-pink to-neon-cyan px-5 py-2.5 font-display text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+                        className="btn-start-over flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-neon-pink to-neon-cyan px-5 py-2.5 font-display text-sm font-semibold text-on-accent transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         start over
                       </motion.button>
@@ -1166,14 +1187,14 @@ function App() {
                   )}
 
                   {checkingBlockers && (
-                    <div className="flex w-full items-center justify-center gap-2 py-2 text-sm text-white/50">
+                    <div className="flex w-full items-center justify-center gap-2 py-2 text-sm text-fg-muted">
                       <Loader2 className="animate-spin text-neon-cyan" size={18} />
                       checking what&apos;s running...
                     </div>
                   )}
 
                   {phase === "cleaning" && (
-                    <div className="flex w-full items-center justify-center gap-2 py-2 text-sm text-white/50">
+                    <div className="flex w-full items-center justify-center gap-2 py-2 text-sm text-fg-muted">
                       <Loader2 className="animate-spin text-neon-pink" size={18} />
                       deleting the clutter...
                     </div>
@@ -1184,8 +1205,16 @@ function App() {
           </AnimatePresence>
         </main>
 
-        <footer className="relative z-10 mt-2 shrink-0 text-center text-[10px] leading-relaxed text-white/45">
-          {APP_NAME} · © {new Date().getFullYear()} {COMPANY_NAME} · free under MIT License
+        <footer className="relative z-10 mt-2 flex shrink-0 items-center justify-center gap-1 text-center text-[10px] leading-relaxed text-fg-subtle">
+          <span>
+            {APP_NAME} · © {new Date().getFullYear()} {COMPANY_NAME} ·
+          </span>
+          <HeaderIconDock
+            compact
+            onThemeClick={() => setShowThemeModal(true)}
+            onAboutClick={() => setShowAboutModal(true)}
+          />
+          <span>· free under MIT License</span>
         </footer>
       </div>
     </div>

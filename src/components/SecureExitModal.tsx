@@ -60,7 +60,7 @@ export function SecureExitModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-overlay/75 p-4 backdrop-blur-sm"
       onClick={onCancel}
     >
       <div
@@ -72,17 +72,17 @@ export function SecureExitModal({
             <LogOut className="text-neon-purple" size={20} />
           </div>
           <div>
-            <h3 className="font-display text-lg font-semibold text-white">
+            <h3 className="font-display text-lg font-semibold text-fg">
               secure exit
             </h3>
-            <p className="mt-1 text-sm text-white/50">
+            <p className="text-body-secondary mt-1">
               shared PC mode — untick anything to skip, then apply to your
               selection.
             </p>
           </div>
         </div>
 
-        <div className="mb-4 rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-2.5 text-sm leading-relaxed text-amber-200/90">
+        <div className="notice-warn mb-4 text-sm">
           You will be signed out of websites. Saved passwords, bookmarks, and
           extensions are not removed.
         </div>
@@ -99,7 +99,7 @@ export function SecureExitModal({
               />
             </div>
 
-            <ul className="mb-4 max-h-48 space-y-1.5 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.03] p-2">
+            <ul className="panel-inset mb-4 max-h-48 space-y-1.5 overflow-y-auto p-2">
               {categories.map((category) => {
                 const selectable = isCategorySelectable(category);
                 const checked = selectedIds.has(category.id);
@@ -111,10 +111,10 @@ export function SecureExitModal({
                       onClick={() => selectable && toggleCategory(category.id)}
                       className={`flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-sm transition-colors ${
                         checked
-                          ? "border-neon-purple/35 bg-neon-purple/10 text-white/90"
+                          ? "border-neon-purple/35 bg-neon-purple/10 text-fg"
                           : selectable
-                            ? "border-transparent bg-transparent text-white/50 hover:bg-white/[0.04]"
-                            : "border-transparent bg-transparent text-white/25"
+                            ? "border-transparent bg-transparent text-fg-muted hover:bg-fg/[0.04]"
+                            : "border-transparent bg-transparent text-fg-subtle/70"
                       }`}
                     >
                       <span
@@ -122,8 +122,8 @@ export function SecureExitModal({
                           checked
                             ? "border-neon-purple bg-neon-purple text-void"
                             : selectable
-                              ? "border-white/20 bg-transparent"
-                              : "border-white/10 bg-transparent"
+                              ? "border-fg/20 bg-transparent"
+                              : "border-fg/10 bg-transparent"
                         }`}
                       >
                         {checked && <Check size={12} strokeWidth={3} />}
@@ -131,7 +131,7 @@ export function SecureExitModal({
                       <span className="text-base leading-none">{category.emoji}</span>
                       <span className="min-w-0 flex-1">{category.name}</span>
                       {!selectable && (
-                        <span className="text-[10px] uppercase tracking-wide text-white/25">
+                        <span className="text-[10px] uppercase tracking-wide text-fg-subtle">
                           {!category.available ? "not installed" : "0 B"}
                         </span>
                       )}
@@ -142,13 +142,13 @@ export function SecureExitModal({
             </ul>
           </>
         ) : (
-          <p className="mb-4 text-sm text-white/45">
+          <p className="text-body-secondary mb-4">
             No secure-exit categories are available right now. Install Chrome,
             Edge, Brave, or Firefox, then run a scan.
           </p>
         )}
 
-        <p className="mb-4 flex items-start gap-1.5 text-xs text-white/40">
+        <p className="text-caption mb-4 flex items-start gap-1.5">
           <Shield size={12} className="mt-0.5 shrink-0" />
           <span>Downloads folder is never included. Close browsers when prompted.</span>
         </p>
@@ -157,7 +157,7 @@ export function SecureExitModal({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-white/60 transition-colors hover:border-white/20 hover:text-white"
+            className="btn-secondary"
           >
             cancel
           </button>
@@ -165,7 +165,7 @@ export function SecureExitModal({
             type="button"
             disabled={selectedCount === 0}
             onClick={() => onConfirm(new Set(selectedIds))}
-            className="rounded-xl bg-gradient-to-r from-neon-purple to-neon-pink px-4 py-2.5 font-display text-sm font-semibold text-white disabled:opacity-40"
+            className="rounded-xl bg-gradient-to-r from-neon-purple to-neon-pink px-4 py-2.5 font-display text-sm font-semibold text-on-accent disabled:opacity-40"
           >
             apply {selectedCount} to selection
           </button>

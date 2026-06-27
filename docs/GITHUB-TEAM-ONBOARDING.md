@@ -2,7 +2,7 @@
 
 **Created:** 2026-06-23  
 **Repository:** [edwardkvpgh/allj-cleaner](https://github.com/edwardkvpgh/allj-cleaner)  
-**Product:** EDdys Cleaner  
+**Product:** Detox (AJThink Labs)  
 **Audience:** A **new team member** joining on their own laptop (repo already exists on GitHub)
 
 **Not you?** If you are creating the repo from scratch on an empty GitHub remote, use [GITHUB-FIRST-PUSH.md](./GITHUB-FIRST-PUSH.md) instead.
@@ -85,7 +85,7 @@ GitHub does **not** accept account passwords for `git push`. Pick one method.
 
 1. Open: https://github.com/settings/tokens  
 2. **Generate new token (classic)**  
-3. Name: e.g. `EDdys Cleaner laptop`  
+3. Name: e.g. `Detox laptop`  
 4. Scope: **repo** (full control of private repositories)  
 5. Generate and **copy** the token (shown once)
 

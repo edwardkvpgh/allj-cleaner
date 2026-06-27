@@ -170,8 +170,8 @@ export function getCleanBanner(result: CleanResult, before: ScanCategory[] = [])
 
   return {
     tone: "warn" as const,
-    border: "border-amber-400/30 bg-amber-400/5",
-    text: "text-amber-400",
+    border: "border-warn-bg/30 bg-warn-bg/8",
+    text: "text-warn",
     title: lockIssues ? "files are locked 🔒" : "couldn't yeet anything ⚠️",
     subtitle: lockIssues
       ? [

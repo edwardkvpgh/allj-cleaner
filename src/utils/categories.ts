@@ -135,17 +135,8 @@ export function isDiskCategory(id: string): boolean {
   return !isPrivacyCategory(id) && !isMiscCategory(id);
 }
 
-export function defaultSelectedCategoryIds(categories: ScanCategory[]): Set<string> {
-  return new Set(
-    categories
-      .filter(
-        (category) =>
-          isDiskCategory(category.id) &&
-          category.available &&
-          category.size_bytes > 0,
-      )
-      .map((category) => category.id),
-  );
+export function defaultSelectedCategoryIds(_categories: ScanCategory[]): Set<string> {
+  return new Set();
 }
 
 export function isCategorySelectable(category: ScanCategory): boolean {

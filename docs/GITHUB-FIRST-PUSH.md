@@ -71,7 +71,7 @@ git status
 Confirm `node_modules/`, `dist/`, and `src-tauri/target/` are **not** listed.
 
 ```powershell
-git commit -m "Initial commit: EDdys Cleaner desktop app"
+git commit -m "Initial commit: Detox desktop app"
 ```
 
 ---
@@ -94,7 +94,7 @@ Create a GitHub token
 
 1. Open: https://github.com/settings/tokens
 2. Generate new token → Generate new token (classic)
-3. Name it something like "EDDYs Cleaner Push"
+3. Name it something like "Detox Push"
 4. Check repo (full control of private repositories)
 5. Generate and copy the token — you won’t see it again
 
@@ -156,7 +156,7 @@ git push https://edwardkvpgh:PASTE_YOUR_TOKEN_HERE@github.com/edwardkvpgh/allj-c
 | Branch | `git branch -M main` |
 | Remote | `git remote add origin https://github.com/edwardkvpgh/allj-cleaner.git` |
 | Stage | `git add .` |
-| Commit | `git commit -m "Initial commit: EDdys Cleaner desktop app"` |
+| Commit | `git commit -m "Initial commit: Detox desktop app"` |
 | Push | `git push -u origin main` |
 
 ---
@@ -194,6 +194,46 @@ If you want only file paths (no status letters):
 git diff --name-only
 git diff --name-only --cached
 ```
+
+---
+
+## Discard all uncommitted changes
+
+Use this when you want to **throw away every local change** and match the last commit exactly.
+
+**Warning:** This is **not reversible**. Uncommitted work is permanently lost. Stash first if you might need it later:
+
+```powershell
+git stash -u
+```
+
+### Three-step reset (run in order)
+
+**1. Discard all changes to tracked files** (staged and unstaged):
+
+```powershell
+git reset --hard HEAD
+```
+
+**2. Remove untracked files and folders** (not in git — e.g. new PDFs, temp files):
+
+```powershell
+git clean -fd
+```
+
+**3. Confirm the working tree is clean:**
+
+```powershell
+git status --short
+```
+
+Expected: **no output** (or only lines you intentionally left untracked and ignored by `.gitignore`).
+
+| Step | Command | What it does |
+|------|---------|----------------|
+| 1 | `git reset --hard HEAD` | Reverts all **tracked** files to the last commit |
+| 2 | `git clean -fd` | Deletes **untracked** files (`-f`) and directories (`-d`) |
+| 3 | `git status --short` | Verifies nothing is left modified or untracked |
 
 ---
 

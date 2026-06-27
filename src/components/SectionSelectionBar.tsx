@@ -21,7 +21,7 @@ export function SectionSelectionBar({
 
   return (
     <div className="flex shrink-0 items-center justify-end gap-3">
-      <p className="text-xs text-white/40">
+      <p className="text-xs text-fg-muted">
         {selectedCount} of {totalCount} selected
       </p>
       <SelectionToggle

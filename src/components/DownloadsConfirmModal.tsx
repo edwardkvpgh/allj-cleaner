@@ -164,7 +164,7 @@ export function DownloadsConfirmModal({
           className={`grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border px-3 py-3 text-left transition-colors sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] ${
             kept
               ? "border-emerald-400/50 bg-emerald-500/10"
-              : "border-white/15 bg-zinc-900/60 hover:border-white/25 hover:bg-zinc-900/90"
+              : "border-fg/15 bg-zinc-900/60 hover:border-fg/25 hover:bg-zinc-900/90"
           }`}
         >
           <span
@@ -232,7 +232,7 @@ export function DownloadsConfirmModal({
 
     return (
       <div className="space-y-2">
-        <div className="sticky top-0 z-10 flex items-center justify-between rounded-md border border-white/10 bg-zinc-950/95 px-3 py-2 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-md border border-fg/10 bg-zinc-950/95 px-3 py-2 backdrop-blur-sm">
           <p className="text-xs font-bold uppercase tracking-wider text-zinc-300">
             {label}
           </p>
@@ -250,7 +250,7 @@ export function DownloadsConfirmModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] overflow-y-auto bg-black/75 p-3 backdrop-blur-sm sm:p-4"
+      className="fixed inset-0 z-[9999] overflow-y-auto bg-overlay/75 p-3 backdrop-blur-sm sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="downloads-confirm-title"
@@ -272,7 +272,7 @@ export function DownloadsConfirmModal({
             <div className="min-w-0">
               <h3
                 id="downloads-confirm-title"
-                className="font-display text-xl font-semibold text-white"
+                className="font-display text-xl font-semibold text-fg"
               >
                 confirm downloads cleanup
               </h3>
@@ -291,19 +291,19 @@ export function DownloadsConfirmModal({
           >
             <div className="flex items-center justify-between gap-3">
               <span className="text-zinc-400">Folder total</span>
-              <span className="font-size-num font-semibold text-white">
+              <span className="font-size-num font-semibold text-fg">
                 {formatCount(scanFileCount)}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3">
               <span className="text-zinc-400">Size</span>
-              <span className="font-size-num font-semibold text-white">
+              <span className="font-size-num font-semibold text-fg">
                 {formatBytes(scanSizeBytes)}
               </span>
             </div>
             {entries.length > 0 && (
               <>
-                <div className="flex items-center justify-between gap-3 sm:col-span-2 sm:border-t sm:border-white/10 sm:pt-2.5">
+                <div className="flex items-center justify-between gap-3 sm:col-span-2 sm:border-t sm:border-fg/10 sm:pt-2.5">
                   <span className="text-zinc-400">Will remove</span>
                   <span className="font-size-num text-right font-semibold text-rose-200">
                     {formatCount(deleteStats.itemCount)} items ·{" "}
@@ -347,7 +347,7 @@ export function DownloadsConfirmModal({
         <button
           type="button"
           onClick={() => (excludeOpen ? setExcludeOpen(false) : openExcludePanel())}
-          className="mb-3 flex w-full shrink-0 items-center justify-between rounded-xl border border-white/20 bg-zinc-900/50 px-4 py-3 text-sm font-medium text-zinc-100 transition-colors hover:border-white/30 hover:bg-zinc-900/80"
+          className="mb-3 flex w-full shrink-0 items-center justify-between rounded-xl border border-fg/20 bg-zinc-900/50 px-4 py-3 text-sm font-medium text-zinc-100 transition-colors hover:border-fg/30 hover:bg-zinc-900/80"
         >
           <span>
             Exclude files / folders
@@ -361,8 +361,8 @@ export function DownloadsConfirmModal({
         </button>
 
         {excludeOpen && (
-          <div className="mb-3 rounded-xl border border-white/15 bg-zinc-950/90">
-            <div className="space-y-2.5 border-b border-white/10 p-3">
+          <div className="mb-3 rounded-xl border border-fg/15 bg-zinc-950/90">
+            <div className="space-y-2.5 border-b border-fg/10 p-3">
               <div className="relative">
                 <Search
                   size={16}
@@ -373,7 +373,7 @@ export function DownloadsConfirmModal({
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Filter by name…"
-                  className="w-full rounded-lg border border-white/15 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/50 focus:outline-none focus:ring-2 focus:ring-amber-400/25"
+                  className="w-full rounded-lg border border-fg/15 bg-zinc-900 py-2.5 pl-10 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400/50 focus:outline-none focus:ring-2 focus:ring-amber-400/25"
                 />
               </div>
 
@@ -388,7 +388,7 @@ export function DownloadsConfirmModal({
                   <button
                     type="button"
                     onClick={clearExclusions}
-                    className="text-sm text-zinc-400 underline-offset-2 hover:text-white hover:underline"
+                    className="text-sm text-zinc-400 underline-offset-2 hover:text-fg hover:underline"
                   >
                     Clear keeps
                   </button>
@@ -430,7 +430,7 @@ export function DownloadsConfirmModal({
 
         </div>
 
-        <div className="shrink-0 border-t border-white/10 pt-4">
+        <div className="shrink-0 border-t border-fg/10 pt-4">
           <p className="mb-3 flex items-start gap-2 text-sm leading-relaxed text-zinc-300">
             <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-400" />
             <span>
@@ -442,7 +442,7 @@ export function DownloadsConfirmModal({
             type="button"
             onClick={() => void handleBrowseInExplorer()}
             disabled={openingExplorer}
-            className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-zinc-900/50 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-white/30 hover:bg-zinc-900 hover:text-white disabled:cursor-wait disabled:opacity-60"
+            className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-fg/20 bg-zinc-900/50 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:border-fg/30 hover:bg-zinc-900 hover:text-fg disabled:cursor-wait disabled:opacity-60"
           >
             <FolderOpen size={16} className="shrink-0 text-amber-400" />
             {openingExplorer ? "Opening…" : "Browse in Explorer"}
@@ -460,7 +460,7 @@ export function DownloadsConfirmModal({
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:border-white/30 hover:text-white"
+              className="rounded-xl border border-fg/20 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:border-fg/30 hover:text-fg"
             >
               Cancel
             </button>

@@ -49,7 +49,7 @@ export function TempCleanPrompt({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-overlay/75 p-4 backdrop-blur-sm"
       onClick={onCancel}
     >
       <div
@@ -61,10 +61,10 @@ export function TempCleanPrompt({
             <AlertTriangle className="text-neon-cyan" size={20} />
           </div>
           <div>
-            <h3 className="font-display text-lg font-semibold text-white">
+            <h3 className="font-display text-lg font-semibold text-fg">
               {copy.title}
             </h3>
-            <p className="mt-1 text-sm text-white/50">{copy.subtitle}</p>
+            <p className="text-body-secondary mt-1">{copy.subtitle}</p>
           </div>
         </div>
 
@@ -74,7 +74,7 @@ export function TempCleanPrompt({
           emptyMessage={copy.emptyMessage}
         />
 
-        <p className="mb-4 text-xs text-white/40">
+        <p className="text-caption mb-4">
           {hasCloseable
             ? `Use "find blocking apps" to close closeable apps automatically, or close protected ones manually.`
             : `Protected system apps cannot be force-closed — use the advice above, or let ${APP_NAME} try a partial clean.`}
@@ -84,7 +84,7 @@ export function TempCleanPrompt({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-white/60 transition-colors hover:border-white/20 hover:text-white"
+            className="btn-secondary"
           >
             cancel
           </button>
@@ -99,7 +99,7 @@ export function TempCleanPrompt({
           <button
             type="button"
             onClick={onYeetAnyway}
-            className="rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple px-4 py-2.5 font-display text-sm font-semibold text-white"
+            className="rounded-xl bg-gradient-to-r from-neon-cyan to-neon-purple px-4 py-2.5 font-display text-sm font-semibold text-on-accent"
           >
             yeet anyway
           </button>

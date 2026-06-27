@@ -15,10 +15,10 @@ export function SelectionToggle({
     accent === "pink"
       ? "text-neon-pink/80 hover:text-neon-pink"
       : accent === "purple"
-        ? "text-neon-purple/80 hover:text-neon-purple"
+        ? "text-section-purple/90 hover:text-section-purple"
         : accent === "amber"
-          ? "text-amber-300/80 hover:text-amber-200"
-          : "text-neon-cyan/80 hover:text-neon-cyan";
+          ? "text-section-amber/90 hover:text-section-amber"
+          : "text-section-cyan/90 hover:text-section-cyan";
 
   return (
     <button

@@ -1,13 +1,13 @@
 ---
 name: docs
 description: >-
-  Maintains EDdys Cleaner documentation in docs/ and the README Project docs
+  Maintains Detox documentation in docs/ and the README Project docs
   table. Use when adding, renaming, or updating docs files, fixing README doc
   links, writing roadmaps/TODO docs, or when the user mentions /docs, project
   documentation, or FUTURE-TODO-LIST.md.
 ---
 
-# EDdys Cleaner — Project docs (`/docs`)
+# Detox — Project docs (`/docs`)
 
 ## Scope
 

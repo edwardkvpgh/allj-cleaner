@@ -2,7 +2,7 @@
 
 **Created:** 2026-06-23  
 **Last updated:** 2026-06-23  
-**Product:** EDdys Cleaner (EDdys Inc)  
+**Product:** Detox (AJThink Labs)
 **Target release:** Post v0.2 — after disk, privacy, and Phase 5 (AppData discovery)  
 **Status:** Planned — not implemented  
 **Repo:** [edwardkvpgh/allj-cleaner](https://github.com/edwardkvpgh/allj-cleaner)
@@ -15,7 +15,7 @@
 
 ## Goal
 
-Add an optional **PI (Performance)** menu for **system tune-up suggestions** — without turning EDdys Cleaner into a full PC Manager, driver updater, or antivirus product.
+Add an optional **PI (Performance)** menu for **system tune-up suggestions** — without turning Detox into a full PC Manager, driver updater, or antivirus product.
 
 **Positioning:** Advisory tune-up and user-confirmed actions — **not** one-click “fix my PC,” **not** in-app driver installation, **not** a replacement for Windows Update or winget.
 
@@ -41,7 +41,7 @@ Add an optional **PI (Performance)** menu for **system tune-up suggestions** —
 | Scan → size_bytes → yeet | Scan → **issue counts** → disable / close / open Settings |
 | Sections: Disk junk, Privacy, Misc | New top-level section: **PI (Performance)** |
 
-EDdys Cleaner is documented as **disk + privacy hygiene** (`SECURITY-PRIVACY-ROADMAP.md`, `INITIAL-PROPOSAL.md`). PI is a **major scope expansion** — ship only after curated disk junk, privacy flows, and Phase 5 AppData discovery are stable.
+Detox is documented as **disk + privacy hygiene** (`SECURITY-PRIVACY-ROADMAP.md`, `INITIAL-PROPOSAL.md`). PI is a **major scope expansion** — ship only after curated disk junk, privacy flows, and Phase 5 AppData discovery are stable.
 
 ---
 
@@ -69,7 +69,7 @@ EDdys Cleaner is documented as **disk + privacy hygiene** (`SECURITY-PRIVACY-ROA
 
 ## Feasibility summary
 
-| PI option | List / scan | Safe one-click fix | Fit for EDdys Cleaner | Suggested PI scope |
+| PI option | List / scan | Safe one-click fix | Fit for Detox | Suggested PI scope |
 |-----------|-------------|--------------------|------------------------|-------------------|
 | **Startup apps** | ✅ Moderate | ⚠️ Risky | Medium | Show entries; user disables selected |
 | **Background apps** | ✅ Good | ⚠️ Partial | Medium–high | Extend process list; close only on confirm |
@@ -316,7 +316,7 @@ lib.rs              → scan_all, clean_*     + startup_scan, disable_startup, l
 
 ### Phase 3
 
-- [ ] Driver row is link-out only or hidden; no driver package download from EDdys Cleaner
+- [ ] Driver row is link-out only or hidden; no driver package download from Detox
 
 ---
 

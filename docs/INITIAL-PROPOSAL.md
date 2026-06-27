@@ -1,4 +1,4 @@
-# EDdys Cleaner — Project Proposal
+# Detox — Project Proposal
 
 A standalone desktop application for scanning and cleaning browser caches, OS temporary files, and other reclaimable disk space on Windows (with optional cross-platform expansion later).
 
@@ -8,7 +8,7 @@ A standalone desktop application for scanning and cleaning browser caches, OS te
 
 ## Executive Summary
 
-**EDdys Cleaner** is a system cleanup utility that helps users free disk space by safely removing temporary and cache files from browsers, the operating system, and common applications.
+**Detox** is a system cleanup utility that helps users free disk space by safely removing temporary and cache files from browsers, the operating system, and common applications.
 
 **Approach:** Standalone desktop application — not a browser-only web app. Cleaning system and browser caches requires deep filesystem access and, for some operations, elevated permissions that a web browser cannot provide.
 
@@ -222,7 +222,7 @@ Users need a **safe, transparent tool** that shows what will be deleted, how muc
 ## Project Structure
 
 ```
-EDdys-Cleaner/
+Detox/
 ├── src/                    # React frontend
 │   ├── components/         # UI components, modals
 │   ├── types.ts

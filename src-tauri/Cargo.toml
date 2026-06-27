@@ -1,7 +1,7 @@
 [package]
 name = "allj-cleaner"
 version = "0.1.0"
-description = "EDdys Cleaner — free your disk, keep your vibe"
+description = "Detox — free your disk, keep your vibe"
 authors = ["you"]
 edition = "2021"
 

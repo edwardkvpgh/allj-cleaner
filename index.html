@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EDdys Cleaner</title>
+    <title>Detox</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,6 +13,61 @@
     />
   </head>
   <body>
+    <script>
+      (function () {
+        var key = "detox-theme";
+        var fallback = "neon";
+        var darkThemes = {
+          neon: 1,
+          "vintage-mood": 1,
+          "cosmic-artistry": 1,
+          "corporate-traditional": 1,
+          "clean-modern": 1,
+          "vibrant-elegant": 1,
+          "warm-ember": 1,
+          "terminal-alert": 1,
+        };
+        var lightThemes = {
+          "metallic-chic": 1,
+          "earthy-serene": 1,
+          "vibrant-calm": 1,
+          "lively-inviting": 1,
+          "artsy-creative": 1,
+          "minimal-warm": 1,
+          "clean-energetic": 1,
+          "agency-gold": 1,
+        };
+        var legacy = {
+          midnight: "neon",
+          dracula: "neon",
+          catppuccin: "neon",
+          "tokyo-night": "neon",
+          nord: "neon",
+          "one-dark": "neon",
+          daylight: "metallic-chic",
+          "github-light": "metallic-chic",
+          paper: "earthy-serene",
+          "solarized-light": "minimal-warm",
+        };
+        var stored = null;
+        try {
+          stored = localStorage.getItem(key);
+        } catch (e) {}
+        var theme = fallback;
+        if (stored) {
+          if (darkThemes[stored] || lightThemes[stored]) {
+            theme = stored;
+          } else if (legacy[stored]) {
+            theme = legacy[stored];
+          }
+        }
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.dataset.themeBrightness = lightThemes[theme]
+          ? "light"
+          : "dark";
+        document.documentElement.style.colorScheme = lightThemes[theme] ? "light" : "dark";
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
